@@ -17,6 +17,7 @@ jobs:
       - run: flet build apk --verbose
         env:
           FLET_CLI_NO_RICH_OUTPUT: "1"
+          SERIOUS_PYTHON_ALLOW_SOURCE_DISTRIBUTIONS: "pyaes,pysocks"
       - uses: actions/upload-artifact@v4
         with:
           name: Abbas-App-APK
