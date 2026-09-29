@@ -1,0 +1,25 @@
+name: Build APK
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Code
+        run: cp app.py main.py || true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - run: flet build apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Abbas-App-APK
+          path: build/apk/**/*.apk
