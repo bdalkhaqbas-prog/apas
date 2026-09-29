@@ -1,41 +1,41 @@
 import flet as ft
 import threading
-import asyncio
 
 def main(page: ft.Page):
-    page.title = "لوحة عباس"
+    page.title = "لوحة عباس 👑"
     page.theme_mode = ft.ThemeMode.DARK
     page.rtl = True
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-
-    info_text = ft.Text("التطبيق فتح بنجاح! 🟢", size=20, weight="bold", color=ft.colors.GREEN)
-    log_text = ft.Text("اضغط فحص المكتبة للتأكد من وجود pyrofork", size=14, color=ft.colors.WHITE70)
-
-    def check_pyrofork(e):
-        log_text.value = "جاري التحقق من المكتبة..."
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    
+    info = ft.Text("التطبيق شغال 100% 🟢", size=24, weight="bold", color=ft.colors.GREEN)
+    status = ft.Text("اضغط الزر لفحص التليجرام", color=ft.colors.WHITE70)
+    
+    def check_telegram(e):
+        status.value = "جاري الفحص... ⏳"
         page.update()
         
         def run_test():
             try:
-                from pyrogram import Client
-                log_text.value = "✅ مكتبة pyrofork شغالة وجاهزة 100% وبدون مشاكل!"
-                log_text.color = ft.colors.CYAN
-            except Exception as err:
-                log_text.value = f"❌ خطأ بالمكتبة: {str(err)}"
-                log_text.color = ft.colors.RED
+                import pyrogram
+                status.value = "✅ مكتبة pyrofork شغالة وموجودة! تكدر تضيف كود البوت هسه."
+                status.color = ft.colors.CYAN
+            except Exception as ex:
+                status.value = f"❌ خطأ بالمكتبة: {str(ex)}"
+                status.color = ft.colors.RED
             page.update()
-
+            
+        # تشغيل الفحص بخيط معزول حتى ما تجمد الشاشة
         threading.Thread(target=run_test, daemon=True).start()
 
-    check_btn = ft.ElevatedButton("فحص اتصال pyrofork 🔍", on_click=check_pyrofork)
-
+    btn = ft.ElevatedButton("فحص مكتبة التليجرام 🚀", on_click=check_telegram, bgcolor=ft.colors.BLUE_700, color=ft.colors.WHITE)
+    
     page.add(
-        ft.Icon(ft.icons.ROCKET_LAUNCH, size=50, color=ft.colors.AMBER),
-        info_text,
+        ft.Icon(ft.icons.ROCKET_LAUNCH, size=60, color=ft.colors.AMBER),
+        info,
         ft.Divider(),
-        check_btn,
-        log_text
+        btn,
+        status
     )
 
 ft.app(target=main)
