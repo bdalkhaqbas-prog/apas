@@ -1,4 +1,0 @@
-pyTelegramBotAPI
-requests
-user_agent
-flask
