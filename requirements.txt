@@ -1,2 +1,2 @@
 flet==0.28.3
-pyrofork==2.3.58
+pyrogram==2.0.106
