@@ -14,7 +14,9 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
       - run: pip install "flet[all]==0.28.3"
-      - run: flet build apk --yes --verbose
+      - run: flet build apk --verbose
+        env:
+          FLET_CLI_NO_RICH_OUTPUT: "1"
       - uses: actions/upload-artifact@v4
         with:
           name: Abbas-App-APK
