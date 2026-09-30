@@ -1,7 +1,7 @@
 [app]
 
 # اسم التطبيق
-title =  control
+title = AbbasBot
 
 # اسم الحزمة
 package.name = abbasbot
@@ -9,7 +9,7 @@ package.name = abbasbot
 # نطاق الحزمة
 package.domain = org.kivy
 
-# مجلد المشروع الذي يحتوي main.py
+# مجلد المصدر الذي يحتوي main.py
 source.dir = .
 
 # الملفات التي سيتم تضمينها
@@ -32,11 +32,11 @@ fullscreen = 0
 # Android
 # ============================================================
 
-# الصلاحيات
+# صلاحيات الإنترنت والعمل في الخلفية
 android.permissions = INTERNET,FOREGROUND_SERVICE,WAKE_LOCK
 
 # إصدار Android المستهدف
-android.api = 33
+android.api = 34
 
 # أقل إصدار Android مدعوم
 android.minapi = 21
@@ -69,3 +69,6 @@ log_level = 2
 
 # التحذير عند التشغيل كـ root
 warn_on_root = 1
+
+# قبول التراخيص تلقائياً
+accept_licenses = 1
