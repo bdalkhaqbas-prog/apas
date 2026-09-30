@@ -8,10 +8,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Rename app.py to main.py
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Rename app.py to main.py (if exists)
         run: cp app.py main.py || true
 
       - name: Setup Python
@@ -25,20 +37,33 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Install System Dependencies
+      - name: Install System Dependencies for Buildozer
         run: |
           sudo apt update
-          sudo apt install -y build-essential git python3-dev libffi-dev libssl-dev libltdl-dev zip unzip autoconf automake libtool gettext
+          sudo apt install -y \
+            build-essential \
+            git \
+            python3-dev \
+            libffi-dev \
+            libssl-dev \
+            libltdl-dev \
+            zip \
+            unzip \
+            autoconf \
+            automake \
+            libtool \
+            gettext
 
-      - name: Install Buildozer
+      - name: Install Buildozer and Cython
         run: |
           python -m pip install --upgrade pip
           pip install buildozer cython virtualenv
 
-      - name: Build APK
-        run: yes | buildozer android debug
+      - name: Build APK using Buildozer
+        run: |
+          yes | buildozer android debug
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Abbas-App-APK
