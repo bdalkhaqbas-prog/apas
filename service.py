@@ -1,4 +1,5 @@
 import time
+
 while True:
-    # كود البوت/اليوزربوت هنا
+    # كود Telethon هنا
     time.sleep(5)
