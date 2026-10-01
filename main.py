@@ -47,14 +47,22 @@ EMOJI = re.compile(
 )
 
 
+# طريقة معالجة العربي (غيّرها إذا ظهر ترتيب الكلمات غلط):
+#   "raw"   = نص خام. الأفضل لو مولّد النصوص عند أندرويد يرتّب العربي بنفسه (حالتك)
+#   "full"  = تشكيل + عكس الترتيب يدوياً (لو طلعت الحروف منفصلة ومعكوسة)
+#   "shape" = تشكيل فقط بدون عكس
+AR_MODE = "raw"
+
+
 def ar(s):
     s = EMOJI.sub("", str(s)).strip()
-    if arabic_reshaper:
-        try:
-            return get_display(arabic_reshaper.reshape(s))
-        except Exception:
-            pass
-    return s
+    if AR_MODE == "raw" or not arabic_reshaper:
+        return s
+    try:
+        s = arabic_reshaper.reshape(s)
+        return get_display(s) if AR_MODE == "full" else s
+    except Exception:
+        return s
 
 
 # ---------------- الثيمات ----------------
@@ -142,9 +150,31 @@ def field(hint, **kw):
         size_hint_y=None, height=h, write_tab=False, **kw)
 
 
+UI_ERR = os.path.join(F.DATA, "ui_error.txt")
+SVC_ERR = os.path.join(F.DATA, "service_error.txt")
+
+
+def last_error():
+    """آخر خطأ من تشغيل الخدمة (من الواجهة أو من الخدمة نفسها)."""
+    for p in (SVC_ERR, UI_ERR):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                t = f.read().strip()
+            if t:
+                return t[-350:]
+        except Exception:
+            pass
+    return ""
+
+
 def start_service():
     if platform != "android":
         return
+    import traceback
+    try:
+        os.remove(UI_ERR)
+    except Exception:
+        pass
     try:
         from android.permissions import request_permissions
         request_permissions(["android.permission.POST_NOTIFICATIONS"])
@@ -156,7 +186,11 @@ def start_service():
         act = autoclass("org.kivy.android.PythonActivity").mActivity
         svc.start(act, "")
     except Exception:
-        pass
+        try:
+            with open(UI_ERR, "w", encoding="utf-8") as f:
+                f.write("start_service: " + traceback.format_exc()[-300:])
+        except Exception:
+            pass
 
 
 def open_battery_settings():
@@ -202,7 +236,9 @@ class PanelApp(App):
     # ---- التواصل مع الخدمة ----
     def send(self, key, text="", cb=None):
         if not self.alive:
-            self.show_status("⏳ الخدمة تبدأ... جرّب بعد ثوانٍ")
+            err = last_error()
+            self.show_status(("❌ الخدمة متوقفة:\n" + err) if err
+                             else "⏳ الخدمة تبدأ... جرّب بعد ثوانٍ")
             return
         cid = int(time.time() * 1000)
         F.write_json(F.CMD_FILE, {"id": cid, "key": key, "text": text})
