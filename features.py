@@ -40,7 +40,7 @@ DEFAULTS = {
     "theme": "dark",
     "smart_typing": True,
     "engine_enabled": True,
-    "welcome_text": "أهلاً بك 👋 سأرد عليك بأقرب وقت.",
+    "welcome_text": "Hi 👋 I'll get back to you as soon as I can.",
 }
 
 
@@ -115,16 +115,16 @@ def G(key):
 # ==========================================================
 # 2. قوائم الميزات (هذي الأزرار)
 # ==========================================================
-PAGE_1_MAP = [("🔒 قفل الخاص", "pm_lock"), ("🔔 اشتراك إجباري", "force_sub"), ("🔥 حفظ التدمير", "save_media"), ("☀️ متصل دائماً", "always_online"), ("⏰ اسم وساعة", "name_clock"), ("👁 قراءة تلقائية", "auto_read"), ("🚫 حظر الغرباء", "auto_block"), ("👻 مسح شبحي", "ghost_delete_pm"), ("👤 منع جهات اتصال", "anti_contact"), ("📍 منع لوكيشن", "anti_location"), ("📊 منع استفتاء", "anti_poll"), ("🎮 منع العاب", "anti_game"), ("🎲 منع نرد", "anti_dice"), ("#️⃣ منع هاشتاك", "anti_hashtag"), ("📌 منع منشن", "anti_mention"), ("📱 منع أرقام", "anti_phone"), ("📧 منع ايميلات", "anti_email"), ("💰 منع كريبتو", "anti_crypto"), ("💻 منع أوامر", "anti_commands"), ("🤬 منع شتائم", "anti_foul_pm"), ("🔗 منع روابط", "anti_links_pm"), ("🤖 منع بوتات", "anti_bot_pm"), ("🔠 منع حروف كبيرة", "anti_caps_pm"), ("🤡 حظر وهميين", "anti_fake_acc"), ("📜 منع الجرائد", "anti_long_msg"), ("🔄 منع توجيه", "anti_fwd_pm"), ("🚫 منع توجيهي", "anti_fwd_me"), ("🚫 منع الرد علي", "anti_reply_me"), ("🚫 منع منشني", "anti_mention_me"), ("📌 تثبيت رسائلي", "pin_my_pm"), ("🔥 مسح وسائطي", "auto_delete_my_media"), ("🔇 كتم الخاص", "auto_mute_pm"), ("💤 حالة نائم", "auto_status_sleep"), ("💼 حالة أعمل", "auto_status_work"), ("🎮 حالة ألعب", "auto_status_play"), ("👁 قراءة البوتات", "read_bots"), ("👋 ترحيب تلقائي", "welcome_pm"), ("🏷 منع التاكات", "anti_tag_pm"), ("💾 حفظ جهات الاتصال", "auto_save_contacts"), ("⏳ كتابة مستمرة", "typing_always_pm"), ("🇮🇶 منع العربي", "anti_arabic_pm"), ("🇺🇸 منع الانكليزي", "anti_english_pm"), ("📌 تثبيت تلقائي", "auto_pin_pm"), ("⭐ منع بريميوم", "anti_premium_pm"), ("🌫 منع المفسد", "anti_spoiler_pm"), ("🔲 منع انلاين", "anti_inline_pm"), ("❤️ تفاعل قلب", "auto_react_heart"), ("🔥 تفاعل نار", "auto_react_fire"), ("✍️ وهم الكتابة", "smart_typing"), ("📝 كشف التعديل", "anti_edit_pm")]
-PAGE_2_MAP = [("🎙 منع بصمات", "anti_voice"), ("📹 منع نوت", "anti_video_note"), ("🖼 منع ملصقات", "anti_stickers"), ("📸 منع صور", "anti_photo"), ("🎥 منع فيديو", "anti_video"), ("📁 منع ملفات", "anti_document"), ("🎞 منع متحركات", "anti_gif"), ("🎵 منع صوتيات", "anti_audio"), ("📚 منع ألبومات", "anti_albums"), ("📱 منع APK", "anti_apk"), ("💻 منع EXE", "anti_exe"), ("🗜 منع ZIP", "anti_zip"), ("⏳ منع بصمة طويلة", "anti_voice_long"), ("⏳ منع فيديو طويل", "anti_video_long"), ("📦 منع ملف ضخم", "anti_doc_large"), ("🌫 منع ميديا مفسدة", "anti_media_spoiler"), ("🔗 منع روابط كروب", "anti_links_group"), ("🔄 منع توجيه كروب", "anti_fwd_group"), ("🤖 منع بوتات كروب", "anti_bots_group"), ("🇮🇶 منع عربي كروب", "anti_ar_group"), ("🇺🇸 منع انكليزي كروب", "anti_en_group"), ("🖼 منع ملصق كروب", "anti_sticker_group"), ("🎞 منع متحرك كروب", "anti_gif_group"), ("📸 منع صور كروب", "anti_photo_group"), ("🎥 منع فيديو كروب", "anti_video_group"), ("🎙 منع بصمة كروب", "anti_voice_group"), ("📁 منع ملف كروب", "anti_doc_group"), ("👤 منع جهات كروب", "anti_contact_group"), ("📊 منع استفتاء كروب", "anti_poll_group"), ("🎮 منع ألعاب كروب", "anti_game_group"), ("❤️ تفاعل كروب", "auto_react_group"), ("📌 تثبيت كروب", "auto_pin_group"), ("👍 تفاعل لايك", "auto_react_thumbsup"), ("👎 تفاعل دسلايك", "auto_react_thumbsdown"), ("⭐ تفاعل نجمة", "auto_react_star"), ("😂 تفاعل ضحك", "auto_react_laugh"), ("🤡 تفاعل مهرج", "auto_react_clown"), ("🤮 تفاعل قرف", "auto_react_vomit"), ("💩 تفاعل براز", "auto_react_poop"), ("🌙 تفاعل قمر", "auto_react_moon"), ("☀️ تفاعل شمس", "auto_react_sun"), ("📢 منع قنوات", "anti_fwd_channel"), ("🔗 روابط قنوات", "anti_links_channel"), ("🖼 ميديا قنوات", "anti_media_channel"), ("❤️ تفاعل قنوات", "auto_react_channels"), ("📥 توجيه السجل", "auto_fwd_log"), ("🗑 سجل المحذوف", "log_deleted_msgs"), ("✏️ سجل المعدل", "log_edited_msgs"), ("🛑 حماية سبام", "anti_spam_group"), ("🌊 حماية تكرار", "anti_flood_group")]
-PAGE_3_MAP = [("🎙 محاكاة بصمة", "sim_record_audio"), ("📹 محاكاة فيديو", "sim_record_video"), ("🕹 محاكاة العاب", "sim_play_game"), ("🖼 محاكاة ملصق", "sim_choose_sticker"), ("📸 محاكاة رفع صورة", "sim_upload_photo"), ("📁 محاكاة رفع ملف", "sim_upload_doc"), ("🎵 محاكاة رفع صوت", "sim_upload_audio"), ("📞 محاكاة اتصال فيديو", "sim_video_call"), ("☎️ محاكاة اتصال صوت", "sim_voice_call"), ("❌ الغاء محاكاة", "sim_typing_cancel"), ("🦜 وضع الببغاء", "echo_mode"), ("🪞 الرد بالمرآة", "mirror_reply"), ("🙃 الرد المعكوس", "reverse_reply"), ("🤪 الرد الاستفزازي", "mocking_reply"), ("👻 رد فارغ", "empty_reply"), (" نقطه بالنهاية", "auto_dot"), ("، فارزة بالنهاية", "auto_comma"), ("؟ سؤال بالنهاية", "auto_question"), ("! تعجب بالنهاية", "auto_exclamation"), ("🔠 تكبير الحروف", "auto_capitalize"), ("🔡 تصغير الحروف", "auto_lowercase"), ("  مسافات متباعدة", "auto_spaces"), ("𝗕 غامق تلقائي", "auto_bold"), ("𝐼 مائل تلقائي", "auto_italic"), ("U مسطر تلقائي", "auto_underline"), ("S مشطوب تلقائي", "auto_strike"), ("🌫 مفسد تلقائي", "auto_spoiler"), ("💬 اقتباس تلقائي", "auto_quote"), ("👨‍💻 كود تلقائي", "auto_code"), ("👋 رد بـ هلا", "auto_reply_hello"), ("🏃 رد بـ باي", "auto_reply_bye"), ("🙏 رد بـ شكراً", "auto_reply_thanks"), ("🚫 رد بـ مشغول", "auto_reply_busy"), ("😴 رد بـ نايم", "auto_reply_sleep"), ("💼 رد بـ بالشغل", "auto_reply_work"), ("🚗 رد بـ اسوق", "auto_reply_drive"), ("🍔 رد بـ اكل", "auto_reply_eat"), ("📚 رد بـ ادرس", "auto_reply_study"), ("🏋️ رد بـ بالجيم", "auto_reply_gym"), ("🐢 كتابة بطيئة", "sim_typing_slow"), ("⚡ كتابة سريعة", "sim_typing_fast"), ("🎲 كتابة عشوائية", "sim_typing_random"), ("🔁 لوب كتابة", "sim_typing_loop"), ("🔁 لوب بصمة", "sim_audio_loop"), ("🔁 لوب فيديو", "sim_video_loop"), ("🔁 لوب العاب", "sim_game_loop"), ("🔁 لوب ملصقات", "sim_sticker_loop"), ("🔁 لوب صور", "sim_photo_loop"), ("🔁 لوب ملفات", "sim_doc_loop"), ("🧠 ذكاء الردود", "smart_ai_reply")]
-PAGE_4_MAP = [("👁 قراءة الخاص", "bg_read_private"), ("👁 قراءة القنوات", "bg_read_channels"), ("👁 قراءة الكروبات", "bg_read_groups"), ("👁 قراءة البوتات", "bg_read_bots"), ("👁 قراءة الكل", "bg_read_all"), ("📦 أرشفة الخاص", "bg_archive_private"), ("📦 أرشفة القنوات", "bg_archive_channels"), ("📦 أرشفة الكروبات", "bg_archive_groups"), ("📦 أرشفة البوتات", "bg_archive_bots"), ("📦 أرشفة الكل", "bg_archive_all"), ("📤 الغاء أرشفة الكل", "bg_unarchive_all"), ("🔇 كتم الخاص", "bg_mute_private"), ("🔇 كتم القنوات", "bg_mute_channels"), ("🔇 كتم الكروبات", "bg_mute_groups"), ("🔇 كتم الكل", "bg_mute_all"), ("🔊 الغاء كتم الكل", "bg_unmute_all"), ("📌 تثبيت الخاص", "bg_pin_private"), ("📌 تثبيت القنوات", "bg_pin_channels"), ("📌 تثبيت الكروبات", "bg_pin_groups"), ("📌 الغاء تثبيت الكل", "bg_unpin_all"), ("🗑 مسح صوري", "bg_del_all_pfps"), ("🗑 تصفير المحفوظات", "bg_clear_saved"), ("🧹 تنظيف الكاش", "bg_clear_cache"), ("🗑 مسح جهات الاتصال", "bg_clear_contacts"), ("💾 حفظ كل الجهات", "bg_add_all_contacts"), ("🚪 مغادرة القنوات", "bg_leave_all_channels"), ("🚪 مغادرة الكروبات", "bg_leave_all_groups"), ("🚪 مغادرة العادية", "bg_leave_basic_groups"), ("🚪 مغادرة السوبر", "bg_leave_super_groups"), ("🗑 مسح منشوراتي", "bg_delete_my_posts"), ("🎲 بايو عشوائي", "bg_random_bio"), ("🚫 مسح البايو", "bg_remove_bio"), ("👻 تفعيل الشبح", "action_fake_deleted"), ("👑 تفعيل الأدمن الوهمي", "action_fake_admin"), ("✅ استرجاع الحساب", "action_restore_profile"), ("📢 اذاعة للخاص", "ask_broadcast_pm"), ("📢 اذاعة للكروبات", "ask_broadcast_groups"), ("📢 اذاعة للكل", "ask_broadcast_all"), ("🔄 توجيه للكل", "ask_broadcast_fwd"), ("📌 تثبيت للكل", "ask_broadcast_pin"), ("📊 احصائيات سريعة", "get_stats_fast"), ("📊 احصائيات شاملة", "get_stats_full"), ("🛑 فحص الحظر", "check_spam_bot"), ("⭐ فحص بريميوم", "check_premium"), ("🔑 فحص الجلسات", "check_sessions"), ("⚙️ تعيين القناة", "set_channel"), ("⚙️ تعيين النشر", "set_post"), ("⚙️ قناة السجل", "set_log_channel"), ("🤬 كلمات الشتائم", "set_bad_words"), ("✏️ تغيير اليوزر", "ask_change_user"), ("👋 نص الترحيب", "set_welcome"), ("📣 نشر المنشور بالقناة", "publish_post")]
+PAGE_1_MAP = [("Lock private chats", "pm_lock"), ("Force channel subscription", "force_sub"), ("Save self-destruct media", "save_media"), ("Always online", "always_online"), ("Name clock", "name_clock"), ("Auto read", "auto_read"), ("Block strangers", "auto_block"), ("Ghost delete (my PMs)", "ghost_delete_pm"), ("Block contacts", "anti_contact"), ("Block location", "anti_location"), ("Block polls", "anti_poll"), ("Block games", "anti_game"), ("Block dice", "anti_dice"), ("Block hashtags", "anti_hashtag"), ("Block mentions", "anti_mention"), ("Block phone numbers", "anti_phone"), ("Block emails", "anti_email"), ("Block crypto addresses", "anti_crypto"), ("Block commands", "anti_commands"), ("Block bad words", "anti_foul_pm"), ("Block links", "anti_links_pm"), ("Block bots", "anti_bot_pm"), ("Block ALL CAPS", "anti_caps_pm"), ("Block fake accounts", "anti_fake_acc"), ("Block long messages", "anti_long_msg"), ("Block forwards", "anti_fwd_pm"), ("Block forwards of my msgs", "anti_fwd_me"), ("Block replies to me", "anti_reply_me"), ("Block mentions of me", "anti_mention_me"), ("Pin my messages", "pin_my_pm"), ("Auto-delete my media", "auto_delete_my_media"), ("Mute private chats", "auto_mute_pm"), ("Status: sleeping", "auto_status_sleep"), ("Status: working", "auto_status_work"), ("Status: playing", "auto_status_play"), ("Read bots", "read_bots"), ("Auto welcome", "welcome_pm"), ("Block tags", "anti_tag_pm"), ("Auto-save contacts", "auto_save_contacts"), ("Always typing", "typing_always_pm"), ("Block Arabic", "anti_arabic_pm"), ("Block English", "anti_english_pm"), ("Auto pin", "auto_pin_pm"), ("Block Premium users", "anti_premium_pm"), ("Block spoilers", "anti_spoiler_pm"), ("Block inline bots", "anti_inline_pm"), ("React: heart", "auto_react_heart"), ("React: fire", "auto_react_fire"), ("Typing illusion", "smart_typing"), ("Edit detection", "anti_edit_pm")]
+PAGE_2_MAP = [("Block voice", "anti_voice"), ("Block video notes", "anti_video_note"), ("Block stickers", "anti_stickers"), ("Block photos", "anti_photo"), ("Block videos", "anti_video"), ("Block files", "anti_document"), ("Block GIFs", "anti_gif"), ("Block audio", "anti_audio"), ("Block albums", "anti_albums"), ("Block APK", "anti_apk"), ("Block EXE", "anti_exe"), ("Block ZIP", "anti_zip"), ("Block long voice", "anti_voice_long"), ("Block long video", "anti_video_long"), ("Block large files", "anti_doc_large"), ("Block spoiler media", "anti_media_spoiler"), ("Group: block links", "anti_links_group"), ("Group: block forwards", "anti_fwd_group"), ("Group: block bots", "anti_bots_group"), ("Group: block Arabic", "anti_ar_group"), ("Group: block English", "anti_en_group"), ("Group: block stickers", "anti_sticker_group"), ("Group: block GIFs", "anti_gif_group"), ("Group: block photos", "anti_photo_group"), ("Group: block videos", "anti_video_group"), ("Group: block voice", "anti_voice_group"), ("Group: block files", "anti_doc_group"), ("Group: block contacts", "anti_contact_group"), ("Group: block polls", "anti_poll_group"), ("Group: block games", "anti_game_group"), ("Group: auto react", "auto_react_group"), ("Group: auto pin", "auto_pin_group"), ("React: like", "auto_react_thumbsup"), ("React: dislike", "auto_react_thumbsdown"), ("React: star", "auto_react_star"), ("React: laugh", "auto_react_laugh"), ("React: clown", "auto_react_clown"), ("React: vomit", "auto_react_vomit"), ("React: poop", "auto_react_poop"), ("React: moon", "auto_react_moon"), ("React: sun", "auto_react_sun"), ("Channels: block forwards", "anti_fwd_channel"), ("Channels: block links", "anti_links_channel"), ("Channels: block media", "anti_media_channel"), ("Channels: auto react", "auto_react_channels"), ("Forward to log", "auto_fwd_log"), ("Log deleted messages", "log_deleted_msgs"), ("Log edited messages", "log_edited_msgs"), ("Spam protection", "anti_spam_group"), ("Flood protection", "anti_flood_group")]
+PAGE_3_MAP = [("Fake: recording voice", "sim_record_audio"), ("Fake: recording video", "sim_record_video"), ("Fake: playing game", "sim_play_game"), ("Fake: choosing sticker", "sim_choose_sticker"), ("Fake: uploading photo", "sim_upload_photo"), ("Fake: uploading file", "sim_upload_doc"), ("Fake: uploading audio", "sim_upload_audio"), ("Fake: video call", "sim_video_call"), ("Fake: voice call", "sim_voice_call"), ("Cancel fake actions", "sim_typing_cancel"), ("Parrot mode", "echo_mode"), ("Mirror reply", "mirror_reply"), ("Reversed reply", "reverse_reply"), ("Mocking reply", "mocking_reply"), ("Empty reply", "empty_reply"), ("Add dot at end", "auto_dot"), ("Add comma at end", "auto_comma"), ("Add ? at end", "auto_question"), ("Add ! at end", "auto_exclamation"), ("UPPERCASE", "auto_capitalize"), ("lowercase", "auto_lowercase"), ("Spaced letters", "auto_spaces"), ("Auto bold", "auto_bold"), ("Auto italic", "auto_italic"), ("Auto underline", "auto_underline"), ("Auto strikethrough", "auto_strike"), ("Auto spoiler", "auto_spoiler"), ("Auto quote", "auto_quote"), ("Auto code", "auto_code"), ("Reply: hello", "auto_reply_hello"), ("Reply: bye", "auto_reply_bye"), ("Reply: thanks", "auto_reply_thanks"), ("Reply: busy", "auto_reply_busy"), ("Reply: sleeping", "auto_reply_sleep"), ("Reply: at work", "auto_reply_work"), ("Reply: driving", "auto_reply_drive"), ("Reply: eating", "auto_reply_eat"), ("Reply: studying", "auto_reply_study"), ("Reply: at the gym", "auto_reply_gym"), ("Slow typing", "sim_typing_slow"), ("Fast typing", "sim_typing_fast"), ("Random typing", "sim_typing_random"), ("Loop: typing", "sim_typing_loop"), ("Loop: voice", "sim_audio_loop"), ("Loop: video", "sim_video_loop"), ("Loop: games", "sim_game_loop"), ("Loop: stickers", "sim_sticker_loop"), ("Loop: photos", "sim_photo_loop"), ("Loop: files", "sim_doc_loop"), ("Smart replies", "smart_ai_reply")]
+PAGE_4_MAP = [("Read private", "bg_read_private"), ("Read channels", "bg_read_channels"), ("Read groups", "bg_read_groups"), ("Read bots", "bg_read_bots"), ("Read all", "bg_read_all"), ("Archive private", "bg_archive_private"), ("Archive channels", "bg_archive_channels"), ("Archive groups", "bg_archive_groups"), ("Archive bots", "bg_archive_bots"), ("Archive all", "bg_archive_all"), ("Unarchive all", "bg_unarchive_all"), ("Mute private", "bg_mute_private"), ("Mute channels", "bg_mute_channels"), ("Mute groups", "bg_mute_groups"), ("Mute all", "bg_mute_all"), ("Unmute all", "bg_unmute_all"), ("Pin private", "bg_pin_private"), ("Pin channels", "bg_pin_channels"), ("Pin groups", "bg_pin_groups"), ("Unpin all", "bg_unpin_all"), ("Delete profile photos", "bg_del_all_pfps"), ("Clear Saved Messages", "bg_clear_saved"), ("Clear cache", "bg_clear_cache"), ("Delete contacts", "bg_clear_contacts"), ("Save all as contacts", "bg_add_all_contacts"), ("Leave all channels", "bg_leave_all_channels"), ("Leave all groups", "bg_leave_all_groups"), ("Leave basic groups", "bg_leave_basic_groups"), ("Leave supergroups", "bg_leave_super_groups"), ("Delete my posts", "bg_delete_my_posts"), ("Random bio", "bg_random_bio"), ("Remove bio", "bg_remove_bio"), ("Ghost mode (Deleted Account)", "action_fake_deleted"), ("Fake admin", "action_fake_admin"), ("Restore profile", "action_restore_profile"), ("Broadcast to private", "ask_broadcast_pm"), ("Broadcast to groups", "ask_broadcast_groups"), ("Broadcast to all", "ask_broadcast_all"), ("Forward to all", "ask_broadcast_fwd"), ("Broadcast and pin", "ask_broadcast_pin"), ("Quick stats", "get_stats_fast"), ("Full stats", "get_stats_full"), ("Check limits (SpamBot)", "check_spam_bot"), ("Check Premium", "check_premium"), ("Check sessions", "check_sessions"), ("Set channel", "set_channel"), ("Set post", "set_post"), ("Set log channel", "set_log_channel"), ("Set bad words", "set_bad_words"), ("Change username", "ask_change_user"), ("Set welcome text", "set_welcome"), ("Publish post to channel", "publish_post")]
 
 VIEWS = [
-    ("الخاص", "💬", PAGE_1_MAP),
-    ("الكروبات", "👥", PAGE_2_MAP),
-    ("الردود", "🤖", PAGE_3_MAP),
-    ("الأوامر", "⚡", PAGE_4_MAP),
+    ("Private", "", PAGE_1_MAP),
+    ("Groups", "", PAGE_2_MAP),
+    ("Replies", "", PAGE_3_MAP),
+    ("Commands", "", PAGE_4_MAP),
 ]
 
 # أوامر خطيرة تحتاج ضغطتين للتأكيد (تستخدمها الواجهة)
@@ -200,11 +200,11 @@ REACTIONS = [
 ]
 
 REPLIES = [
-    ("auto_reply_hello", "هلا والله 👋"), ("auto_reply_bye", "باي 👋"),
-    ("auto_reply_thanks", "العفو 🙏"), ("auto_reply_busy", "مشغول حالياً 🚫"),
-    ("auto_reply_sleep", "نايم حالياً 😴"), ("auto_reply_work", "بالشغل حالياً 💼"),
-    ("auto_reply_drive", "أسوق حالياً 🚗"), ("auto_reply_eat", "أكل حالياً 🍔"),
-    ("auto_reply_study", "أدرس حالياً 📚"), ("auto_reply_gym", "بالجيم حالياً 🏋️"),
+    ("auto_reply_hello", "Hey there 👋"), ("auto_reply_bye", "Bye 👋"),
+    ("auto_reply_thanks", "You're welcome 🙏"), ("auto_reply_busy", "Busy right now 🚫"),
+    ("auto_reply_sleep", "Sleeping right now 😴"), ("auto_reply_work", "At work right now 💼"),
+    ("auto_reply_drive", "Driving right now 🚗"), ("auto_reply_eat", "Eating right now 🍔"),
+    ("auto_reply_study", "Studying right now 📚"), ("auto_reply_gym", "At the gym right now 🏋️"),
 ]
 
 SIM_ACTIONS = [
@@ -222,20 +222,20 @@ SIM_LOOPS = [
 ]
 
 STATUS_BIOS = [
-    ("auto_status_sleep", "💤 نائم حالياً"),
-    ("auto_status_work", "💼 أعمل حالياً"),
-    ("auto_status_play", "🎮 ألعب حالياً"),
+    ("auto_status_sleep", "💤 Sleeping"),
+    ("auto_status_work", "💼 Working"),
+    ("auto_status_play", "🎮 Playing"),
 ]
 
 SMART_RULES = [
-    (("السلام عليكم",), "وعليكم السلام ورحمة الله 🌹"),
-    (("هلا", "مرحبا", "هاي", "hello", "hi"), "هلا والله 👋"),
-    (("شلونك", "كيفك", "شخبارك", "how are you"), "تمام الحمدلله، وانت شلونك؟ 😊"),
-    (("شكرا", "مشكور", "thanks", "thx"), "العفو 🙏"),
-    (("صباح الخير",), "صباح النور ☀️"),
-    (("مساء الخير",), "مساء النور 🌙"),
-    (("تصبح على خير", "تصبحون على خير"), "وانت من أهله 🌙"),
-    (("باي", "مع السلامة", "bye"), "الله وياك 👋"),
+    (("السلام عليكم", "assalamu alaikum"), "Wa alaikum assalam 🌹"),
+    (("هلا", "مرحبا", "هاي", "hello", "hi", "hey"), "Hey there 👋"),
+    (("شلونك", "كيفك", "شخبارك", "how are you"), "I'm good, thanks! How about you? 😊"),
+    (("شكرا", "مشكور", "thanks", "thx"), "You're welcome 🙏"),
+    (("صباح الخير", "good morning"), "Good morning ☀️"),
+    (("مساء الخير", "good evening"), "Good evening 🌙"),
+    (("تصبح على خير", "تصبحون على خير", "good night"), "Good night 🌙"),
+    (("باي", "مع السلامة", "bye"), "See you 👋"),
 ]
 
 
@@ -250,7 +250,7 @@ def smart_reply(txt):
             if hit:
                 return ans
     if "؟" in t or "?" in t:
-        return "خلني أشوف وأرجعلك 🤔"
+        return "Let me check and get back to you 🤔"
     return None
 
 
@@ -542,7 +542,7 @@ async def handle_private(cli, m, enums):
         if time.time() - last > 600:
             STATE["sub_warned"][u.id] = time.time()
             await attempt(cli.send_message(
-                m.chat.id, f"🔔 يرجى الاشتراك بالقناة {C('channel')} ثم أعد المحاولة."))
+                m.chat.id, f"🔔 Please subscribe to the channel {C('channel')} and try again."))
         return
 
     if G("auto_block") and not u.is_contact:
@@ -616,9 +616,9 @@ def transform_text(t):
     if G("auto_dot"):
         new += "."
     if G("auto_comma"):
-        new += "،"
+        new += ","
     if G("auto_question"):
-        new += "؟"
+        new += "?"
     if G("auto_exclamation"):
         new += "!"
     wraps = [
@@ -673,10 +673,10 @@ async def handle_edited(cli, m, enums):
     old = MSG_CACHE.get((m.chat.id, m.id))
     MSG_CACHE[(m.chat.id, m.id)] = new
     if old and old != new:
-        who = u.first_name or "مستخدم"
-        place = "" if is_private else f" في «{m.chat.title}»"
+        who = u.first_name or "User"
+        place = "" if is_private else f" in \"{m.chat.title}\""
         await attempt(cli.send_message(
-            log_target(), f"✏️ {who}{place} عدّل رسالة:\nقبل: {old}\nبعد: {new}"))
+            log_target(), f"✏️ {who}{place} edited a message:\nBefore: {old}\nAfter: {new}"))
 
 
 # ==========================================================
@@ -730,7 +730,7 @@ async def start_engine():
     session_str = C("session_string", "")
     if not session_str:
         # بدون هذا الفحص كان pyrogram يطلب تسجيل دخول تفاعلي ويعلق للأبد
-        raise RuntimeError("لا توجد جلسة: سجّل الدخول أولاً")
+        raise RuntimeError("No session: log in first")
     app = Client("abbas_bot", api_id=API_ID, api_hash=API_HASH,
                  session_string=session_str, in_memory=True)
 
@@ -857,7 +857,7 @@ async def act_bulk(verb, kind):
         except Exception:
             pass
         await asyncio.sleep(0.3)
-    return f"✅ تم تنفيذ الأمر على {n} محادثة"
+    return f"✅ Done on {n} chats"
 
 
 async def act_profile(key, text):
@@ -867,22 +867,22 @@ async def act_profile(key, text):
         ids = [p.file_id async for p in c.get_chat_photos("me")]
         if ids:
             await c.delete_profile_photos(ids)
-        return f"✅ تم مسح {len(ids)} صورة"
+        return f"✅ Deleted {len(ids)} photos"
 
     if key == "bg_random_bio":
-        bio = random.choice(["☀️ يوم جديد", "🔥 ابتسم", "✨ الحمدلله دائماً", "🚀 نحو الأفضل"])
+        bio = random.choice(["☀️ New day", "🔥 Keep smiling", "✨ Grateful always", "🚀 Onward and upward"])
         await c.update_profile(bio=bio)
-        return f"✅ البايو صار: {bio}"
+        return f"✅ Bio set to: {bio}"
 
     if key == "bg_remove_bio":
         await c.update_profile(bio="")
-        return "✅ تم مسح البايو"
+        return "✅ Bio removed"
 
     if key == "ask_change_user":
         if not text:
-            return "⚠️ اكتب اليوزر الجديد في الحقل أعلاه"
+            return "⚠️ Type the new username in the text box first"
         await c.set_username(text.lstrip("@"))
-        return f"✅ تم تغيير اليوزر إلى @{text.lstrip('@')}"
+        return f"✅ Username changed to @{text.lstrip('@')}"
 
     if key in ("action_fake_deleted", "action_fake_admin"):
         me = await c.get_me()
@@ -895,18 +895,18 @@ async def act_profile(key, text):
             })
         if key == "action_fake_deleted":
             await c.update_profile(first_name="Deleted Account", last_name="", bio="")
-            return "👻 تم تفعيل الشبح (اضغط «استرجاع الحساب» للرجوع)"
+            return "👻 Ghost mode on (tap Restore profile to undo)"
         first = C("profile_backup")["first"]
         await c.update_profile(first_name=first, last_name="👑 Admin")
-        return "👑 تم تفعيل الأدمن الوهمي (اضغط «استرجاع الحساب» للرجوع)"
+        return "👑 Fake admin on (tap Restore profile to undo)"
 
     if key == "action_restore_profile":
         b = C("profile_backup")
         if not b:
-            return "ℹ️ لا توجد نسخة احتياطية للحساب"
+            return "ℹ️ No profile backup found"
         await c.update_profile(first_name=b["first"], last_name=b["last"], bio=b["bio"])
         save_data("profile_backup", None)
-        return "✅ تم استرجاع الاسم والبايو"
+        return "✅ Name and bio restored"
 
     return None
 
@@ -918,19 +918,19 @@ async def act_data(key, text):
         ids = [m.id async for m in c.get_chat_history("me")]
         for i in range(0, len(ids), 100):
             await c.delete_messages("me", ids[i:i + 100])
-        return f"✅ تم مسح {len(ids)} رسالة من المحفوظات"
+        return f"✅ Deleted {len(ids)} saved messages"
 
     if key == "bg_clear_cache":
         shutil.rmtree("downloads", ignore_errors=True)
         MSG_CACHE.clear()
         FLOOD.clear()
-        return "✅ تم تنظيف الكاش"
+        return "✅ Cache cleared"
 
     if key == "bg_clear_contacts":
         users = await c.get_contacts()
         if users:
             await c.delete_contacts([u.id for u in users])
-        return f"✅ تم مسح {len(users)} جهة اتصال"
+        return f"✅ Deleted {len(users)} contacts"
 
     if key == "bg_add_all_contacts":
         n = 0
@@ -941,12 +941,12 @@ async def act_data(key, text):
             except Exception:
                 pass
             await asyncio.sleep(0.3)
-        return f"✅ تم حفظ {n} جهة اتصال"
+        return f"✅ Saved {n} contacts"
 
     if key == "bg_unpin_all":
         from pyrogram.raw import functions
         await c.invoke(functions.messages.ReorderPinnedDialogs(folder_id=0, order=[], force=True))
-        return "✅ تم إلغاء تثبيت كل المحادثات"
+        return "✅ Unpinned all chats"
 
     if key == "bg_delete_my_posts":
         n = 0
@@ -960,7 +960,7 @@ async def act_data(key, text):
                     n += len(ids)
             except Exception:
                 pass
-        return f"✅ تم مسح {n} رسالة من كروباتك"
+        return f"✅ Deleted {n} messages from your groups"
 
     return None
 
@@ -973,22 +973,22 @@ async def act_info(key, text):
         for k in counts:
             async for _ in each_chat(k):
                 counts[k] += 1
-        msg = (f"👤 خاص: {counts['private']} | 🤖 بوتات: {counts['bots']} | "
-               f"👥 كروبات: {counts['groups']} | 📢 قنوات: {counts['channels']}")
+        msg = (f"Private: {counts['private']} | Bots: {counts['bots']} | "
+               f"Groups: {counts['groups']} | Channels: {counts['channels']}")
         if key == "get_stats_full":
-            msg += f" | 📇 جهات: {len(await c.get_contacts())}"
+            msg += f" | Contacts: {len(await c.get_contacts())}"
         return msg
 
     if key == "check_premium":
         me = await c.get_me()
-        return "⭐ حسابك بريميوم" if getattr(me, "is_premium", False) else "حسابك عادي (غير بريميوم)"
+        return "Your account is Premium" if getattr(me, "is_premium", False) else "Your account is not Premium"
 
     if key == "check_spam_bot":
         await c.send_message("SpamBot", "/start")
         await asyncio.sleep(3)
         async for mm in c.get_chat_history("SpamBot", limit=1):
-            return "🛑 " + (mm.text or "")[:300]
-        return "ℹ️ لم يصل رد من SpamBot"
+            return "SpamBot: " + (mm.text or "")[:300]
+        return "No reply from SpamBot"
 
     if key == "check_sessions":
         from pyrogram.raw import functions
@@ -997,9 +997,9 @@ async def act_info(key, text):
         for a in r.authorizations:
             s = f"{a.device_model} • {a.platform}"
             if a.current:
-                s += " (الحالية)"
+                s += " (current)"
             lines.append(s)
-        return f"🔑 الجلسات ({len(lines)}): " + " | ".join(lines)
+        return f"Sessions ({len(lines)}): " + " | ".join(lines)
 
     return None
 
@@ -1009,7 +1009,7 @@ async def act_broadcast(key, text):
 
     if key in ("ask_broadcast_pm", "ask_broadcast_groups", "ask_broadcast_all", "ask_broadcast_pin"):
         if not text:
-            return "⚠️ اكتب نص الإذاعة في الحقل أعلاه أولاً"
+            return "⚠️ Type the broadcast text in the box first"
         kind = {
             "ask_broadcast_pm": "private", "ask_broadcast_groups": "groups",
             "ask_broadcast_all": "talk", "ask_broadcast_pin": "groups",
@@ -1024,12 +1024,12 @@ async def act_broadcast(key, text):
             except Exception:
                 pass
             await asyncio.sleep(1.5)
-        return f"✅ تمت الإذاعة إلى {n} محادثة"
+        return f"✅ Broadcast sent to {n} chats"
 
     if key == "ask_broadcast_fwd":
         last = [mm async for mm in c.get_chat_history("me", limit=1)]
         if not last:
-            return "⚠️ المحفوظات فارغة: ضع رسالة فيها أولاً لتوجيهها"
+            return "⚠️ Saved Messages is empty: put a message there first"
         n = 0
         async for chat in each_chat("talk"):
             try:
@@ -1038,30 +1038,30 @@ async def act_broadcast(key, text):
             except Exception:
                 pass
             await asyncio.sleep(1.5)
-        return f"✅ تم توجيه آخر رسالة من المحفوظات إلى {n} محادثة"
+        return f"✅ Forwarded your last saved message to {n} chats"
 
     if key == "publish_post":
         ch, post = channel_ref(), C("post_text")
         if not ch or not post:
-            return "⚠️ عيّن القناة والمنشور أولاً (تعيين القناة / تعيين النشر)"
+            return "⚠️ Set the channel and the post first (Set channel / Set post)"
         await c.send_message(ch, post)
-        return "✅ تم نشر المنشور بالقناة"
+        return "✅ Post published to the channel"
 
     return None
 
 
 async def act_settings(key, text):
     mapping = {
-        "set_channel": ("channel", "✅ تم تعيين القناة"),
-        "set_post": ("post_text", "✅ تم حفظ نص المنشور"),
-        "set_log_channel": ("log_channel", "✅ تم تعيين قناة السجل"),
-        "set_bad_words": ("bad_words", "✅ تم حفظ كلمات الشتائم (افصل بينها بفاصلة ,)"),
-        "set_welcome": ("welcome_text", "✅ تم حفظ نص الترحيب"),
+        "set_channel": ("channel", "✅ Channel set"),
+        "set_post": ("post_text", "✅ Post text saved"),
+        "set_log_channel": ("log_channel", "✅ Log channel set"),
+        "set_bad_words": ("bad_words", "✅ Bad words saved (separate with commas)"),
+        "set_welcome": ("welcome_text", "✅ Welcome text saved"),
     }
     if key not in mapping:
         return None
     if not text:
-        return "⚠️ اكتب القيمة في الحقل أعلاه أولاً"
+        return "⚠️ Type the value in the box first"
     field, done = mapping[key]
     save_data(field, text)
     return done
@@ -1084,7 +1084,7 @@ async def act_auth(key, text):
 
     if key == "auth_send_code":
         if not text:
-            return "❌ اكتب رقم الهاتف"
+            return "❌ Enter your phone number"
         phone = "+" + text.strip().lstrip("+").replace(" ", "")
         if AUTH["client"]:
             await attempt(AUTH["client"].disconnect())
@@ -1097,7 +1097,7 @@ async def act_auth(key, text):
     if key == "auth_sign_in":
         c = AUTH["client"]
         if not c:
-            return "❌ أرسل الرمز أولاً"
+            return "❌ Request the code first"
         try:
             await c.sign_in(AUTH["phone"], AUTH["hash"], text.strip())
         except Exception as ex:
@@ -1109,7 +1109,7 @@ async def act_auth(key, text):
     if key == "auth_password":
         c = AUTH["client"]
         if not c:
-            return "❌ أرسل الرمز أولاً"
+            return "❌ Request the code first"
         await c.check_password(text)
         return await _finish_auth()
 
@@ -1128,7 +1128,7 @@ async def do_action(key, text):
     if key.startswith("auth_") or key == "logout":
         return await act_auth(key, text)
     if key not in NO_CLIENT_OK and bot_client_ref[0] is None:
-        return "⚠️ شغّل المحرك أولاً من بطاقة التشغيل!"
+        return "⚠️ Start the engine first!"
     if key in ACTS:
         verb, kind = ACTS[key]
         return await act_bulk(verb, kind)
@@ -1136,4 +1136,4 @@ async def do_action(key, text):
         result = await fn(key, text)
         if result is not None:
             return result
-    return "ℹ️ هذه الميزة غير مفعّلة في هذه النسخة"
+    return "ℹ️ This feature is not available in this version"
