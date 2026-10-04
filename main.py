@@ -21,48 +21,15 @@ from kivy.utils import platform
 
 import features as F
 
-try:
-    import arabic_reshaper
-    from bidi.algorithm import get_display
-except Exception:
-    arabic_reshaper = None
-
-# ---------------- الخط العربي ----------------
-HERE = os.path.dirname(os.path.abspath(__file__))
-for _p in (
-    os.path.join(HERE, "font.ttf"),
-    "/system/fonts/NotoNaskhArabic-Regular.ttf",
-    "/system/fonts/NotoSansArabic-Regular.ttf",
-    "/system/fonts/NotoSansArabicUI-Regular.ttf",
-    "/system/fonts/DroidSansArabic.ttf",
-):
-    if os.path.exists(_p):
-        LabelBase.register(name="Roboto", fn_regular=_p, fn_bold=_p)
-        break
-
-# Kivy ما يعرض الإيموجي الملوّن، فنشيله من العرض فقط (الأسماء الأصلية تبقى بـ features.py)
+# Kivy cannot draw color emoji, so they are stripped from displayed text
 EMOJI = re.compile(
     "[\U0001F000-\U0001FAFF\U0001D400-\U0001D7FF\u2190-\u2BFF"
     "\u3030\u303d\u3297\u3299\ufe0f\u200d\u20e3\u200e\u200f]"
 )
 
 
-# طريقة معالجة العربي (غيّرها إذا ظهر ترتيب الكلمات غلط):
-#   "raw"   = نص خام. الأفضل لو مولّد النصوص عند أندرويد يرتّب العربي بنفسه (حالتك)
-#   "full"  = تشكيل + عكس الترتيب يدوياً (لو طلعت الحروف منفصلة ومعكوسة)
-#   "shape" = تشكيل فقط بدون عكس
-AR_MODE = "raw"
-
-
 def ar(s):
-    s = EMOJI.sub("", str(s)).strip()
-    if AR_MODE == "raw" or not arabic_reshaper:
-        return s
-    try:
-        s = arabic_reshaper.reshape(s)
-        return get_display(s) if AR_MODE == "full" else s
-    except Exception:
-        return s
+    return EMOJI.sub("", str(s)).strip()
 
 
 # ---------------- الثيمات ----------------
@@ -98,7 +65,7 @@ def kind_colors(kind):
 
 # ---------------- عناصر الواجهة ----------------
 class RLabel(Label):
-    def __init__(self, text="", size=15, color=None, bold=False, auto=True, halign="right", **kw):
+    def __init__(self, text="", size=15, color=None, bold=False, auto=True, halign="left", **kw):
         super().__init__(
             text=ar(text), color=color or T("text"), font_size=sp(size),
             bold=bold, halign=halign, valign="middle", **kw)
@@ -237,13 +204,13 @@ class PanelApp(App):
     def send(self, key, text="", cb=None):
         if not self.alive:
             err = last_error()
-            self.show_status(("❌ الخدمة متوقفة:\n" + err) if err
-                             else "⏳ الخدمة تبدأ... جرّب بعد ثوانٍ")
+            self.show_status(("❌ Service stopped:\n" + err) if err
+                             else "⏳ Service is starting... try again in a few seconds")
             return
         cid = int(time.time() * 1000)
         F.write_json(F.CMD_FILE, {"id": cid, "key": key, "text": text})
         self.pending, self.cb, self.pending_t = cid, cb, time.time()
-        self.show_status("⏳ جاري التنفيذ...")
+        self.show_status("⏳ Working...")
 
     def show_status(self, msg):
         if self.status_lbl:
@@ -260,7 +227,7 @@ class PanelApp(App):
                 (cb or self.show_status)(msg)
             elif time.time() - self.pending_t > 600:
                 self.pending = self.cb = None
-                self.show_status("⚠️ انتهت المهلة")
+                self.show_status("⚠️ Timed out")
         if self.refresh_engine:
             self.refresh_engine()
 
@@ -275,9 +242,9 @@ class PanelApp(App):
         self.new_screen()
         col = BoxLayout(orientation="vertical", spacing=dp(12), size_hint_y=None)
         col.bind(minimum_height=col.setter("height"))
-        col.add_widget(RLabel("تسجيل الدخول", size=26, bold=True, halign="center"))
-        col.add_widget(RLabel("استخدم حساب تيليجرام الخاص بك", size=13, color=T("sub"), halign="center"))
-        phone = field("رقم الهاتف مع رمز الدولة (بدون +)", multiline=False,
+        col.add_widget(RLabel("Sign in", size=26, bold=True, halign="center"))
+        col.add_widget(RLabel("Use your Telegram account", size=13, color=T("sub"), halign="center"))
+        phone = field("Phone number with country code (no +)", multiline=False,
                       input_filter=lambda s, u: "".join(c for c in s if c.isdigit() or c == " "))
         col.add_widget(phone)
         steps = {"code": None, "pw": None}
@@ -288,20 +255,20 @@ class PanelApp(App):
                 n -= 1
                 if n <= 0:
                     btn.disabled = False
-                    btn.text = ar("إرسال الرمز مجدداً")
+                    btn.text = ar("Resend code")
                     return False
-                btn.text = ar(f"إعادة الإرسال بعد {n} ثانية")
+                btn.text = ar(f"Resend in {n}s")
             btn.disabled = True
             Clock.schedule_interval(step, 1)
 
         def after_send(msg):
             if msg == "CODE_SENT":
-                self.show_status("تم إرسال الرمز بنجاح")
+                self.show_status("Code sent")
                 if not steps["code"]:
-                    steps["code"] = field("رمز التحقق", multiline=False,
+                    steps["code"] = field("Verification code", multiline=False,
                                           input_filter="int")
                     col.add_widget(steps["code"])
-                    col.add_widget(pill("تأكيد الرمز", lambda: self.send(
+                    col.add_widget(pill("Confirm code", lambda: self.send(
                         "auth_sign_in", steps["code"].text, after_login), "success"))
                 cooldown()
             else:
@@ -311,16 +278,16 @@ class PanelApp(App):
             if msg == "LOGGED_IN":
                 self.show_dashboard()
             elif msg == "NEED_PASSWORD":
-                self.show_status("مطلوب كلمة مرور التحقق بخطوتين")
+                self.show_status("Two-step verification password required")
                 if not steps["pw"]:
-                    steps["pw"] = field("كلمة المرور", multiline=False, password=True)
+                    steps["pw"] = field("Password", multiline=False, password=True)
                     col.add_widget(steps["pw"])
-                    col.add_widget(pill("دخول", lambda: self.send(
+                    col.add_widget(pill("Sign in", lambda: self.send(
                         "auth_password", steps["pw"].text, after_login), "filled"))
             else:
                 self.show_status(msg)
 
-        btn = pill("متابعة", lambda: self.send("auth_send_code", phone.text, after_send), "filled")
+        btn = pill("Continue", lambda: self.send("auth_send_code", phone.text, after_send), "filled")
         col.add_widget(btn)
         col.add_widget(self.status_lbl)
         sv = ScrollView()
@@ -334,10 +301,10 @@ class PanelApp(App):
 
         # شريط العنوان
         bar = BoxLayout(size_hint_y=None, height=dp(48), spacing=dp(6))
-        self.btn_logout = pill("خروج", self.logout_click, "danger", size_hint_x=None, width=dp(72))
+        self.btn_logout = pill("Logout", self.logout_click, "danger", size_hint_x=None, width=dp(72))
+        bar.add_widget(RLabel("Developer Panel @qs_66", size=18, bold=True, auto=False))
+        bar.add_widget(pill("Theme", self.toggle_theme, "surface", size_hint_x=None, width=dp(64)))
         bar.add_widget(self.btn_logout)
-        bar.add_widget(pill("ثيم", self.toggle_theme, "surface", size_hint_x=None, width=dp(64)))
-        bar.add_widget(RLabel("لوحة المطور @qs_66", size=18, bold=True, auto=False))
         self.box.add_widget(bar)
 
         main = BoxLayout(orientation="vertical", spacing=dp(8), size_hint_y=None)
@@ -346,29 +313,29 @@ class PanelApp(App):
         # بطاقة المحرك
         eng = Card(orientation="horizontal", size_hint_y=None, height=dp(80),
                    padding=dp(12), spacing=dp(8))
-        self.btn_engine = pill("تشغيل", self.toggle_engine, "filled", size_hint_x=None, width=dp(100))
-        eng.add_widget(self.btn_engine)
+        self.btn_engine = pill("Start", self.toggle_engine, "filled", size_hint_x=None, width=dp(100))
         info = BoxLayout(orientation="vertical")
         self.eng_title = RLabel("", size=17, bold=True, auto=False)
         self.eng_sub = RLabel("", size=12, color=T("sub"), auto=False)
         info.add_widget(self.eng_title)
         info.add_widget(self.eng_sub)
         eng.add_widget(info)
+        eng.add_widget(self.btn_engine)
         main.add_widget(eng)
 
         if platform == "android":
-            main.add_widget(pill("استثناء التطبيق من توفير البطارية", open_battery_settings, "tonal"))
+            main.add_widget(pill("Exclude app from battery optimization", open_battery_settings, "tonal"))
 
         main.add_widget(self.status_lbl)
 
         # البحث والتبويبات
-        search = field("ابحث عن ميزة", multiline=False)
+        search = field("Search features", multiline=False)
         search.bind(text=lambda i, v: self.on_search(v))
         main.add_widget(search)
 
         self.tabs = {}
         tabs_row = BoxLayout(size_hint_y=None, height=dp(44), spacing=dp(6))
-        for name, _icon, _items in reversed(F.VIEWS):
+        for name, _icon, _items in F.VIEWS:
             b = pill(name, lambda n=name: self.open_view(n), "surface")
             b.height = dp(44)
             self.tabs[name] = b
@@ -378,7 +345,7 @@ class PanelApp(App):
         self.counter = RLabel("", size=12, color=T("sub"))
         main.add_widget(self.counter)
 
-        self.cmd_input = field("نص للأوامر (إذاعة / يوزر / قناة / كلمات / ترحيب)",
+        self.cmd_input = field("Text for commands (broadcast / username / channel / words / welcome)",
                                multiline=True, height=dp(90))
         self.list_box = BoxLayout(orientation="vertical", spacing=dp(6), size_hint_y=None)
         self.list_box.bind(minimum_height=self.list_box.setter("height"))
@@ -397,18 +364,18 @@ class PanelApp(App):
         enabled = bool(F.C("engine_enabled", True))
         st = self.st
         if not self.alive:
-            t, s = "الخدمة غير شغالة", "انتظر ثوانٍ أو افتح التطبيق من جديد"
+            t, s = "Service not running", "Wait a few seconds or reopen the app"
         elif st.get("running"):
-            t, s = "المحرك يعمل", "البوت متصل ويستقبل الرسائل"
+            t, s = "Engine running", "Connected and receiving messages"
         elif st.get("err"):
-            t, s = "المحرك متوقف", st["err"][:90]
+            t, s = "Engine stopped", st["err"][:90]
         elif enabled:
-            t, s = "جاري الاتصال...", "ثوانٍ ويشتغل"
+            t, s = "Connecting...", "Starting in a moment"
         else:
-            t, s = "المحرك متوقف", "اضغط تشغيل لبدء العمل بالخلفية"
+            t, s = "Engine stopped", "Tap Start to run in the background"
         self.eng_title.set(t)
         self.eng_sub.set(s)
-        self.btn_engine.text = ar("إيقاف" if enabled else "تشغيل")
+        self.btn_engine.text = ar("Stop" if enabled else "Start")
         set_kind(self.btn_engine, "danger" if enabled else "filled")
 
     def toggle_engine(self):
@@ -422,11 +389,11 @@ class PanelApp(App):
     def logout_click(self):
         if not self.logout_armed:
             self.logout_armed = True
-            self.btn_logout.text = ar("تأكيد؟")
+            self.btn_logout.text = ar("Confirm?")
 
             def reset(dt):
                 self.logout_armed = False
-                self.btn_logout.text = ar("خروج")
+                self.btn_logout.text = ar("Logout")
             Clock.schedule_once(reset, 5)
             return
         self.send("logout", "", lambda m: self.show_login())
@@ -453,18 +420,18 @@ class PanelApp(App):
 
     def update_counter(self):
         items = self.items_of(self.view)
-        if self.view == "الأوامر":
-            self.counter.set(f"{len(items)} أمر")
+        if self.view == "Commands":
+            self.counter.set(f"{len(items)} commands")
         else:
             on = sum(1 for _l, k in items if F.G(k))
-            self.counter.set(f"{on} مفعّل من {len(items)}")
+            self.counter.set(f"{on} of {len(items)} enabled")
 
     def rebuild_list(self):
         lb = self.list_box
         lb.clear_widgets()
         q = self.query.strip()
-        items = [(l, k) for l, k in self.items_of(self.view) if q in l]
-        if self.view == "الأوامر":
+        items = [(l, k) for l, k in self.items_of(self.view) if q.lower() in l.lower()]
+        if self.view == "Commands":
             lb.add_widget(self.cmd_input)
             for label, key in items:
                 lb.add_widget(self.action_row(label, key))
@@ -472,7 +439,7 @@ class PanelApp(App):
             for label, key in items:
                 lb.add_widget(self.switch_row(label, key))
         if not items:
-            lb.add_widget(RLabel("لا توجد نتائج", color=T("sub")))
+            lb.add_widget(RLabel("No results", color=T("sub")))
         self.update_counter()
 
     def switch_row(self, label, key):
@@ -480,8 +447,8 @@ class PanelApp(App):
                    padding=[dp(10), dp(4)], spacing=dp(8))
         sw = Switch(active=bool(F.G(key)), size_hint_x=None, width=dp(90))
         sw.bind(active=lambda i, v, k=key: self.on_switch(k, v))
-        row.add_widget(sw)
         row.add_widget(RLabel(label, size=15, auto=False))
+        row.add_widget(sw)
         return row
 
     def on_switch(self, key, value):
@@ -494,7 +461,7 @@ class PanelApp(App):
         def click():
             if key in F.DANGER and not armed["on"]:
                 armed["on"] = True
-                btn.text = ar("اضغط مرة ثانية للتأكيد")
+                btn.text = ar("Tap again to confirm")
                 set_kind(btn, "danger")
 
                 def reset(dt):
