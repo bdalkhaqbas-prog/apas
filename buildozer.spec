@@ -1,14 +1,14 @@
 [app]
-title = VIP Panel
-package.name = panel
-package.domain = org.vip
+title = BattlegroundsPro
+package.name = battlegrounds
+package.domain = org.qs66
 source.dir = .
-source.include_exts = py,png,jpg,kv
+source.include_exts = py,html,js,png,jpg
 version = 1.0
-requirements = python3,kivy==2.3.0,telethon,pyaes,rsa,pyasn1
-orientation = portrait
-services = myservice:service.py:foreground
-android.permissions = INTERNET,FOREGROUND_SERVICE,POST_NOTIFICATIONS,WAKE_LOCK
+requirements = python3,pyjnius
+orientation = landscape
+fullscreen = 1
+android.permissions = INTERNET
 android.api = 33
 android.minapi = 24
 android.ndk = 25b
