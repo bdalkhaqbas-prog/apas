@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>BATTLEGROUNDS MOBILE PRO — @qs_66</title>
+  <!-- Three.js & PeerJS for Real P2P ID Multiplayer -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <style>
+    :root {
+      --bg-black: #070709;
+      --panel-black: rgba(10, 11, 14, 0.88);
+      --btn-black: rgba(14, 15, 19, 0.82);
+      --btn-hover: rgba(28, 30, 38, 0.95);
+      --border-subtle: rgba(255, 255, 255, 0.14);
+      --border-active: rgba(255, 255, 255, 0.48);
+      --text-main: #f2f4f8;
+      --text-muted: #8a909e;
+      --accent-white: #ffffff;
+      --danger: #e53935;
+      --success: #43a047;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-black);
+      color: var(--text-main);
+      touch-action: none;
+    }
+
+    /* Root App Wrapper with Portrait-to-Landscape Auto Support */
+    #app-root {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #050507;
+    }
+
+    #app-root.force-landscape {
+      width: 100vh;
+      height: 100vw;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(90deg);
+      transform-origin: center center;
+    }
+
+    /* 3D Canvas */
+    #webgl-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Smooth Fade Transitions for UI Screens */
+    .ui-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                  visibility 0.38s;
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+
+    .ui-layer.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: scale(1.03);
+    }
+
+    /* Developer Watermark */
+    .dev-badge {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      background: rgba(5, 5, 7, 0.85);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #d0d4dc;
+      pointer-events: none;
+      text-transform: uppercase;
+    }
+
+    /* ================= LOBBY UI ================= */
+    #lobby-screen {
+      display: grid;
+      grid-template-columns: 310px 1fr 340px;
+      grid-template-rows: 58px 1fr 72px;
+      padding: 12px 18px;
+      gap: 12px;
+      background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.1) 0%, rgba(5,5,8,0.88) 100%);
+      pointer-events: auto;
+    }
+
+    .lobby-header {
+      grid-column: 1 / 4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel-black);
+      border: 1px solid var(--border-subtle);
+      padding: 0 16px;
+      border-radius: 6px;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #fff;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      padding-left: 10px;
+      border-left: 1px solid var(--border-subtle);
+    }
+
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dark-pill {
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid var(--border-subtle);
+      padding: 5px 11px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 0.6px;
+    }
+
+    .dark-btn {
+      background: var(--btn-black);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-transform: uppercase;
+    }
+
+    .dark-btn:hover, .dark-btn:active {
+      background: var(--btn-hover);
+      border-color: var(--border-active);
+    }
+
+    .dark-btn.active {
+      background: #1c1f26;
+      border-color: #ffffff;
+      color: #ffffff;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
+    }
+
+    /* Left Panel: Profile, Outfits, Mode & Matchmaking Type */
+    .lobby-left, .lobby-right {
+      background: var(--panel-black);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding-bottom: 4px;
+      margin-top: 2px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dark-input {
+      flex: 1;
+      background: #060709;
+      border: 1px solid var(--border-subtle);
+      color: #fff;
+      padding: 7px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .dark-input:focus {
+      border-color: #fff;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .outfit-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    /* Center Viewport (3D Character Stand) */
+    .lobby-center {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      pointer-events: none;
+      padding-bottom: 12px;
+    }
+
+    .char-nametag {
+      background: rgba(5, 5, 7, 0.82);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 18px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    /* Right Panel: 30 Weapons Armory + P2P Network Panel */
+    .weapon-cats {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .cat-tab {
+      flex: 1;
+      padding: 5px 6px;
+      font-size: 10px;
+      background: #090a0d;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      font-weight: 700;
+      border-radius: 3px;
+    }
+
+    .cat-tab.active {
+      background: #1f2229;
+      color: #fff;
+      border-color: #fff;
+    }
+
+    .weapon-list {
+      flex: 1;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      max-height: 190px;
+      padding-right: 3px;
+    }
+
+    .weapon-item {
+      background: rgba(12, 13, 17, 0.9);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .weapon-item.active {
+      border-color: #fff;
+      background: #1d2028;
+    }
+
+    .weapon-item .w-name {
+      font-size: 11px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .weapon-item .w-meta {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* Network / No-Bots Box */
+    #network-panel {
+      background: rgba(5, 6, 8, 0.92);
+      border: 1px solid var(--border-subtle);
+      padding: 8px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .peer-list {
+      max-height: 68px;
+      overflow-y: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      background: #040406;
+      padding: 5px;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Footer Bar */
+    .lobby-footer {
+      grid-column: 1 / 4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel-black);
+      border: 1px solid var(--border-subtle);
+      padding: 0 16px;
+      border-radius: 6px;
+    }
+
+    #start-match-btn {
+      background: #14161b;
+      color: #ffffff;
+      border: 1px solid #ffffff;
+      padding: 12px 34px;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s ease;
+    }
+
+    #start-match-btn:hover {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    /* ================= IN-GAME HUD ================= */
+    #hud-screen {
+      pointer-events: none;
+    }
+
+    /* Top Scoreboard */
+    .hud-top-bar {
+      position: absolute;
+      top: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(8, 9, 12, 0.85);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 18px;
+      border-radius: 4px;
+      pointer-events: auto;
+    }
+
+    .team-score {
+      font-size: 18px;
+      font-weight: 900;
+      min-width: 36px;
+      text-align: center;
+    }
+
+    .match-timer {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    /* Top Right Quick Menu */
+    .hud-top-right {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    /* Top Left Radar / Minimap */
+    #minimap-box {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      width: 115px;
+      height: 115px;
+      background: rgba(8, 9, 12, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      overflow: hidden;
+      pointer-events: auto;
+    }
+
+    #minimap-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Crosshair & Scope Overlay */
+    #crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 26px;
+      height: 26px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: transform 0.08s ease;
+    }
+
+    .ch-line {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.9);
+    }
+    .ch-t { top: 0; left: 12px; width: 2px; height: 7px; }
+    .ch-b { bottom: 0; left: 12px; width: 2px; height: 7px; }
+    .ch-l { left: 0; top: 12px; width: 7px; height: 2px; }
+    .ch-r { right: 0; top: 12px; width: 7px; height: 2px; }
+    .ch-dot { top: 12px; left: 12px; width: 2px; height: 2px; background: #fff; }
+
+    /* Sniper / ADS Vignette */
+    #scope-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, transparent 28%, rgba(0, 0, 0, 0.96) 58%);
+      pointer-events: none;
+    }
+
+    #scope-overlay::before, #scope-overlay::after {
+      content: '';
+      position: absolute;
+      background: rgba(255, 255, 255, 0.45);
+    }
+    #scope-overlay::before { top: 50%; left: 15%; right: 15%; height: 1px; }
+    #scope-overlay::after { left: 50%; top: 15%; bottom: 15%; width: 1px; }
+
+    /* Hitmarker */
+    #hitmarker {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      transform: translate(-50%, -50%) rotate(45deg);
+      border: 2px solid #fff;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.08s;
+    }
+
+    /* Bottom Status Bar (HP & Ammo) */
+    .hud-bottom-center {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 280px;
+      background: rgba(8, 9, 12, 0.85);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 12px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      pointer-events: auto;
+    }
+
+    .hp-bar-outer {
+      width: 100%;
+      height: 7px;
+      background: #181a20;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    #hp-bar-inner {
+      width: 100%;
+      height: 100%;
+      background: #e8ecf2;
+      transition: width 0.15s ease;
+    }
+
+    .ammo-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    /* Kill Feed */
+    #kill-feed {
+      position: absolute;
+      top: 138px;
+      left: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      pointer-events: none;
+    }
+
+    .kill-item {
+      background: rgba(6, 7, 10, 0.82);
+      border-left: 2px solid #fff;
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #e4e7ec;
+      border-radius: 2px;
+    }
+
+    /* ================= CUSTOMIZABLE BLACK TOUCH CONTROLS ================= */
+    #touch-controls-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    /* Right side look touchpad */
+    #look-touch-zone {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 55%;
+      height: 100%;
+      pointer-events: auto;
+      z-index: 2;
+    }
+
+    /* Left side floating joystick zone */
+    #move-touch-zone {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 45%;
+      height: 100%;
+      pointer-events: auto;
+      z-index: 2;
+    }
+
+    .hud-control-btn {
+      position: absolute;
+      z-index: 6;
+      background: rgba(10, 11, 14, 0.78);
+      border: 1.5px solid rgba(255, 255, 255, 0.24);
+      color: #f0f2f5;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      pointer-events: auto;
+      touch-action: none;
+      transition: background 0.1s, border-color 0.1s;
+    }
+
+    .hud-control-btn:active, .hud-control-btn.pressed {
+      background: rgba(34, 37, 46, 0.95);
+      border-color: #ffffff;
+    }
+
+    .hud-control-btn.selected-for-edit {
+      border: 2px dashed #ffffff !important;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+    }
+
+    /* Virtual Joystick Visual */
+    #joystick-ring {
+      position: absolute;
+      z-index: 5;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(8, 9, 12, 0.62);
+      border: 1.5px solid rgba(255, 255, 255, 0.22);
+      pointer-events: none;
+    }
+
+    #joystick-knob {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(24, 26, 33, 0.95);
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+    }
+
+    /* ================= HUD LAYOUT & SETTINGS EDITOR MODAL ================= */
+    #editor-modal {
+      z-index: 50;
+      background: rgba(4, 5, 7, 0.55);
+      pointer-events: auto;
+    }
+
+    .editor-toolbar {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0a0b0e;
+      border: 1px solid var(--border-active);
+      padding: 12px 18px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 390px;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      accent-color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-root">
+    <!-- Developer Signature -->
+    <div class="dev-badge">DEVELOPER @qs_66 | PRO ENGINE</div>
+
+    <!-- 3D WebGL Viewport -->
+    <div id="webgl-container"></div>
+
+    <!-- ==================== 1. MAIN LOBBY SCREEN ==================== -->
+    <div id="lobby-screen" class="ui-layer">
+      <!-- Header -->
+      <div class="lobby-header">
+        <div class="brand-block">
+          <div class="brand-title">BATTLEGROUNDS PRO</div>
+          <div class="brand-sub">BY @qs_66</div>
+        </div>
+        <div class="header-stats">
+          <div class="dark-pill" id="lobby-fps-badge">FPS: 60</div>
+          <button class="dark-btn" id="btn-toggle-orientation">ORIENTATION: AUTO</button>
+          <button class="dark-btn" id="btn-open-hud-editor">CUSTOMIZE CONTROLS</button>
+        </div>
+      </div>
+
+      <!-- Left Column: Player Identity, Outfits, Map Mode & Match Mode -->
+      <div class="lobby-left">
+        <div class="section-label">OPERATOR PROFILE</div>
+        <div class="input-row">
+          <input type="text" id="player-name-input" class="dark-input" maxlength="16" value="QS_OPERATOR" placeholder="Enter Player Name" />
+        </div>
+
+        <div class="section-label">MATCHMAKING MODE</div>
+        <div class="grid-2">
+          <button class="dark-btn active" id="mode-with-bots">WITH BOTS (AI)</button>
+          <button class="dark-btn" id="mode-no-bots">NO BOTS (ONLINE ID)</button>
+        </div>
+
+        <!-- Network & Unique ID Box (Shown when NO BOTS is active) -->
+        <div id="network-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:10px; color:#8a909e; font-weight:700;">YOUR UNIQUE ID:</span>
+            <span id="my-unique-id" style="font-size:12px; font-weight:900; color:#fff; letter-spacing:1px;">INITIALIZING...</span>
+          </div>
+          <div class="input-row">
+            <input type="text" id="remote-id-input" class="dark-input" placeholder="Enter Target Player ID..." />
+            <button class="dark-btn" id="btn-connect-id">JOIN</button>
+          </div>
+          <div style="font-size:10px; color:#8a909e; font-weight:700;">CONNECTED / LAN PLAYERS:</div>
+          <div class="peer-list" id="connected-peers-list">Scanning local network & P2P channel...</div>
+        </div>
+
+        <div class="section-label">SELECT BATTLE MAP</div>
+        <div class="grid-2">
+          <button class="dark-btn active" id="map-warehouse">TDM WAREHOUSE</button>
+          <button class="dark-btn" id="map-classic">CLASSIC GRASSLAND</button>
+        </div>
+
+        <div class="section-label">CHARACTER OUTFIT</div>
+        <div class="outfit-list" id="outfit-selector">
+          <button class="dark-btn active" data-outfit="specops">BLACK SPEC-OPS</button>
+          <button class="dark-btn" data-outfit="desert">DESERT CAMO</button>
+          <button class="dark-btn" data-outfit="ghillie">FOREST GHILLIE</button>
+          <button class="dark-btn" data-outfit="arctic">ARCTIC TACTICAL</button>
+          <button class="dark-btn" data-outfit="crimson">MERCENARY DARK</button>
+          <button class="dark-btn" data-outfit="stealth">SHADOW VIPER</button>
+        </div>
+      </div>
+
+      <!-- Center Column: 3D Articulated Character Preview -->
+      <div class="lobby-center">
+        <div class="char-nametag" id="preview-nametag">QS_OPERATOR | M416</div>
+      </div>
+
+      <!-- Right Column: 30 Weapons Armory & Frame Rate Settings -->
+      <div class="lobby-right">
+        <div class="section-label">ARMORY — 30 WEAPONS</div>
+        <div class="weapon-cats" id="weapon-cat-tabs">
+          <div class="cat-tab active" data-cat="ALL">ALL (30)</div>
+          <div class="cat-tab" data-cat="AR">AR</div>
+          <div class="cat-tab" data-cat="SMG">SMG</div>
+          <div class="cat-tab" data-cat="SR">SNIPER/DMR</div>
+          <div class="cat-tab" data-cat="HVY">LMG/SG</div>
+        </div>
+        <div class="weapon-list" id="weapon-list-container"></div>
+
+        <div class="section-label">FRAME RATE & SENSITIVITY</div>
+        <div class="grid-2">
+          <button class="dark-btn" data-fps="60">60 FPS</button>
+          <button class="dark-btn active" data-fps="90">90 FPS</button>
+          <button class="dark-btn" data-fps="120">120 FPS (ULTRA)</button>
+          <button class="dark-btn" id="btn-toggle-shadows">SHADOWS: HIGH</button>
+        </div>
+        <div class="slider-row">
+          <span>AIM SENSITIVITY</span>
+          <input type="range" id="sens-slider" min="20" max="200" value="100" />
+          <span id="sens-val">100%</span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="lobby-footer">
+        <div style="font-size:11px; color:#8a909e; font-weight:700;" id="lobby-status-text">
+          MODE: 4v4 TDM WAREHOUSE | AI BOTS ENABLED
+        </div>
+        <button id="start-match-btn">START MATCH</button>
+      </div>
+    </div>
+
+    <!-- ==================== 2. IN-GAME HUD SCREEN ==================== -->
+    <div id="hud-screen" class="ui-layer hidden">
+      <!-- Minimap -->
+      <div id="minimap-box">
+        <canvas id="minimap-canvas" width="115" height="115"></canvas>
+      </div>
+
+      <!-- Top Scoreboard -->
+      <div class="hud-top-bar">
+        <div class="team-score" id="score-blue">0</div>
+        <div class="match-timer" id="hud-mode-label">TDM 40</div>
+        <div class="team-score" id="score-red">0</div>
+      </div>
+
+      <!-- Top Right Controls -->
+      <div class="hud-top-right">
+        <div class="dark-pill" id="hud-fps-counter">90 FPS</div>
+        <button class="dark-btn" id="btn-hud-customize">CONTROLS</button>
+        <button class="dark-btn" id="btn-leave-match">LOBBY</button>
+      </div>
+
+      <!-- Kill Feed -->
+      <div id="kill-feed"></div>
+
+      <!-- Crosshair -->
+      <div id="crosshair">
+        <div class="ch-line ch-t"></div>
+        <div class="ch-line ch-b"></div>
+        <div class="ch-line ch-l"></div>
+        <div class="ch-line ch-r"></div>
+        <div class="ch-dot"></div>
+      </div>
+
+      <!-- Scope Overlay -->
+      <div id="scope-overlay" class="ui-layer hidden"></div>
+
+      <!-- Hitmarker -->
+      <div id="hitmarker"></div>
+
+      <!-- Bottom Status Bar -->
+      <div class="hud-bottom-center">
+        <div class="hp-bar-outer">
+          <div id="hp-bar-inner"></div>
+        </div>
+        <div class="ammo-row">
+          <span id="hud-weapon-name">M416</span>
+          <span id="hud-ammo-text">30 / 180</span>
+        </div>
+      </div>
+
+      <!-- Touch Controls & Customizable Buttons -->
+      <div id="touch-controls-layer">
+        <div id="move-touch-zone"></div>
+        <div id="look-touch-zone"></div>
+
+        <!-- Floating Joystick -->
+        <div id="joystick-ring" style="left: 9%; bottom: 16%;">
+          <div id="joystick-knob"></div>
+        </div>
+
+        <!-- Customizable Tactical Black Buttons -->
+        <div class="hud-control-btn" id="btn-fire-right" data-btn-id="fireRight" style="right: 10%; bottom: 18%; width: 78px; height: 78px;">FIRE</div>
+        <div class="hud-control-btn" id="btn-fire-left" data-btn-id="fireLeft" style="left: 22%; top: 28%; width: 64px; height: 64px;">FIRE</div>
+        <div class="hud-control-btn" id="btn-scope" data-btn-id="scope" style="right: 6%; bottom: 44%; width: 58px; height: 58px;">SCOPE</div>
+        <div class="hud-control-btn" id="btn-reload" data-btn-id="reload" style="right: 22%; bottom: 12%; width: 52px; height: 52px;">RELOAD</div>
+        <div class="hud-control-btn" id="btn-jump" data-btn-id="jump" style="right: 3%; bottom: 26%; width: 54px; height: 54px;">JUMP</div>
+        <div class="hud-control-btn" id="btn-crouch" data-btn-id="crouch" style="right: 16%; bottom: 32%; width: 52px; height: 52px;">CROUCH</div>
+        <div class="hud-control-btn" id="btn-peek-l" data-btn-id="peekL" style="right: 28%; top: 26%; width: 48px; height: 48px;">PEEK L</div>
+        <div class="hud-control-btn" id="btn-peek-r" data-btn-id="peekR" style="right: 20%; top: 26%; width: 48px; height: 48px;">PEEK R</div>
+        <div class="hud-control-btn" id="btn-switch-wpn" data-btn-id="switchWpn" style="left: 38%; bottom: 14%; width: 56px; height: 56px;">WEAPON</div>
+      </div>
+    </div>
+
+    <!-- ==================== 3. CUSTOM HUD LAYOUT EDITOR MODAL ==================== -->
+    <div id="editor-modal" class="ui-layer hidden">
+      <div class="editor-toolbar">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; font-weight:900; letter-spacing:1px;">CONTROL LAYOUT CUSTOMIZER (@qs_66)</span>
+          <span id="selected-btn-label" style="font-size:11px; color:#8a909e;">Drag any button to move</span>
+        </div>
+        <div class="slider-row">
+          <span>BUTTON SIZE</span>
+          <input type="range" id="edit-btn-scale" min="50" max="160" value="100" />
+          <span id="edit-scale-val">100%</span>
+        </div>
+        <div class="slider-row">
+          <span>BUTTON OPACITY</span>
+          <input type="range" id="edit-btn-opacity" min="15" max="100" value="80" />
+          <span id="edit-opacity-val">80%</span>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button class="dark-btn" id="btn-reset-hud">RESET DEFAULT</button>
+          <button class="dark-btn active" id="btn-save-hud">SAVE & EXIT</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load 3D Engine & Systems -->
+  <script src="engine.js"></script>
+</body>
+</html>
