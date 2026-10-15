@@ -1,0 +1,81 @@
+name: Build Android APK (@qs_66)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. جلب ملفات اللعبة الأربعة من المستودع
+      - name: Checkout Game Files
+        uses: actions/checkout@v4
+
+      # 2. تثبيت Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. تثبيت Java JDK 17 الرسمية لبناء الأندرويد
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 4. تثبيت Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # 5. إنشاء مشروع الأندرويد ونسخ الملفات الأربعة داخله
+      - name: Create Cordova Project & Copy Files
+        run: |
+          which gradle || (sudo apt-get update && sudo apt-get install -y gradle)
+          npm install -g cordova
+          cordova create build_app com.qs66.battlegrounds "Battlegrounds Pro"
+          
+          # مسح الملفات الافتراضية
+          rm -rf build_app/www/*
+          
+          # نسخ ملفات لعبتك الأربعة إلى مجلد التطبيق
+          cp index.html build_app/www/
+          if [ -f "style.css" ]; then cp style.css build_app/www/; fi
+          if [ -f "lobby.js" ]; then cp lobby.js build_app/www/; fi
+          if [ -f "combat.js" ]; then cp combat.js build_app/www/; fi
+
+          # إعداد ملف config.xml لقفل الشاشة بالعرض وملء الشاشة الكامل
+          cat << 'EOF' > build_app/config.xml
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.qs66.battlegrounds" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+              <name>Battlegrounds Pro</name>
+              <description>3D Warehouse & Classic Game by @qs_66</description>
+              <author email="qs66@dev.local" href="https://github.com">@qs_66</author>
+              <content src="index.html" />
+              <access origin="*" />
+              <allow-intent href="http://*/*" />
+              <allow-intent href="https://*/*" />
+              <allow-navigation href="*" />
+              <preference name="Orientation" value="landscape" />
+              <preference name="Fullscreen" value="true" />
+              <preference name="DisallowOverscroll" value="true" />
+              <preference name="AndroidInsecureFileModeEnabled" value="true" />
+          </widget>
+          EOF
+
+      # 6. بناء وتجميع ملف الـ APK النهائي
+      - name: Build Android APK
+        working-directory: ./build_app
+        run: |
+          cordova platform add android
+          cordova build android --debug
+
+      # 7. رفع ملف الـ APK الجاهز لكي تحمله في هاتفك
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Battlegrounds-Pro-APK
+          path: build_app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
