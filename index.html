@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content: blob: ws: wss:; style-src * 'self' 'unsafe-inline'; script-src * 'self' 'unsafe-inline' 'unsafe-eval';" />
+  <title>BATTLEGROUNDS MOBILE PRO — @qs_66</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Three.js & PeerJS for Online ID Multiplayer -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+</head>
+<body>
+  <div id="app-root">
+    <!-- 3D WebGL Background & World Canvas -->
+    <div id="webgl-viewport"></div>
+
+    <!-- ==================== 1. MAIN LOBBY SCREEN ==================== -->
+    <section id="screen-lobby" class="ui-screen">
+      <!-- Top Left Profile Box -->
+      <div class="lobby-top-left">
+        <div class="profile-card">
+          <div class="avatar-box">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="#9aa0a6">
+              <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+            </svg>
+          </div>
+          <div class="profile-info">
+            <span class="profile-label">Profile name</span>
+            <input type="text" id="input-player-name" class="profile-input" value="QS_OPERATOR" maxlength="16" placeholder="Enter Name..." />
+            <span class="dev-sub">Developer: @qs_66</span>
+          </div>
+        </div>
+        <div class="top-quick-icons">
+          <button class="icon-sq-btn" id="btn-lobby-settings" title="Settings">⚙</button>
+          <button class="icon-sq-btn" id="btn-copy-id" title="Copy Unique ID">✉</button>
+          <button class="icon-sq-btn" id="btn-rotate-screen" title="Rotate Screen">🔄</button>
+        </div>
+      </div>
+
+      <!-- Top Right Currency & Status -->
+      <div class="lobby-top-right">
+        <div class="currency-pill"><span class="gold-dot">BP</span> 3,308</div>
+        <div class="currency-pill"><span class="uc-dot">UC</span> 30</div>
+        <div class="fps-badge" id="lobby-fps-text">60 FPS HD</div>
+        <button class="icon-sq-btn" id="btn-open-settings-top">⚙</button>
+      </div>
+
+      <!-- Left Social Sidebar -->
+      <div class="lobby-left-sidebar">
+        <button class="side-icon-btn active" title="Solo / Profile">👤</button>
+        <button class="side-icon-btn" id="btn-quick-armory" title="Armory">🔫</button>
+        <button class="side-icon-btn" id="btn-quick-outfits" title="Outfits">👕</button>
+      </div>
+
+      <!-- Bottom Left Navigation Buttons -->
+      <div class="lobby-bottom-left">
+        <button class="tactical-nav-btn" id="btn-open-outfits">
+          <span class="btn-main-txt">CUSTOMIZE</span>
+          <span class="btn-sub-txt">CHARACTER & OUTFITS</span>
+        </button>
+        <button class="tactical-nav-btn" id="btn-open-armory">
+          <span class="btn-main-txt">LOADOUT</span>
+          <span class="btn-sub-txt">(30 WEAPONS)</span>
+        </button>
+      </div>
+
+      <!-- Right Matchmaking & Network Panel -->
+      <div class="lobby-right-panel">
+        <button class="mode-select-btn active" id="btn-mode-warehouse">WAREHOUSE TDM</button>
+        <button class="mode-select-btn" id="btn-mode-classic">CLASSIC MODE (GRASS MAP)</button>
+
+        <div class="bot-toggle-row">
+          <button class="bot-toggle-btn active" id="btn-with-bots">WITH BOTS</button>
+          <button class="bot-toggle-btn" id="btn-no-bots">
+            <span>NO BOTS</span>
+            <small>(ONLINE / LAN)</small>
+          </button>
+        </div>
+
+        <div class="online-lan-box">
+          <div class="online-box-header">
+            <span>ONLINE PLAYERS / LAN</span>
+            <span class="online-dot" id="net-status-dot"></span>
+          </div>
+          <div class="my-id-banner">
+            YOUR ID: <strong id="display-my-id">QS-0000</strong>
+          </div>
+          <div class="search-id-row">
+            <input type="text" id="input-search-id" placeholder="SEARCH BY PLAYER ID..." />
+            <button id="btn-join-id">🔍</button>
+          </div>
+          <div class="online-players-list" id="online-peers-container">
+            <div class="peer-empty">Scanning local Wi-Fi & Online ID channel...</div>
+          </div>
+        </div>
+
+        <button class="start-match-btn" id="btn-start-match">START MATCH</button>
+      </div>
+    </section>
+
+    <!-- ==================== 2. ARMORY & CUSTOMIZATION SCREEN ==================== -->
+    <section id="screen-armory" class="ui-screen hidden">
+      <!-- Top Bar -->
+      <div class="armory-header">
+        <div class="armory-header-left">
+          <button class="back-btn" id="btn-armory-back">❮ BACK</button>
+          <h2 class="armory-title">Armory & Customization</h2>
+        </div>
+        <div class="armory-header-center">Dev: @qs_66</div>
+        <div class="armory-header-right">
+          <div class="currency-pill"><span class="gold-dot">BP</span> 3,308</div>
+          <div class="currency-pill"><span class="uc-dot">UC</span> 30</div>
+          <div class="fps-badge">60 FPS HD</div>
+        </div>
+      </div>
+
+      <!-- Left Weapons Grid & Category Tabs -->
+      <div class="armory-left-container">
+        <div class="armory-main-tabs">
+          <button class="armory-tab active" id="tab-btn-weapons">WEAPONS</button>
+          <button class="armory-tab" id="tab-btn-outfits">OUTFITS</button>
+        </div>
+        <div class="weapon-filter-row" id="armory-cat-pills">
+          <button class="cat-pill active" data-cat="ALL">ALL (30)</button>
+          <button class="cat-pill" data-cat="AR">AR</button>
+          <button class="cat-pill" data-cat="SMG">SMG</button>
+          <button class="cat-pill" data-cat="SR">SNIPER</button>
+          <button class="cat-pill" data-cat="HVY">LMG/SG</button>
+        </div>
+        <div class="weapons-grid" id="armory-weapons-grid"></div>
+      </div>
+
+      <!-- Center-Left Weapon Stats Floating Overlay -->
+      <div class="weapon-stats-panel">
+        <h3 id="stat-weapon-name">M416</h3>
+        <div class="stat-group">
+          <div class="stat-label-row"><span>Damage</span><span id="stat-dmg-val">41</span></div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="stat-dmg-bar" style="width: 55%;"></div></div>
+        </div>
+        <div class="stat-group">
+          <div class="stat-label-row"><span>Fire Rate</span><span id="stat-rate-val">78</span></div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="stat-rate-bar" style="width: 78%;"></div></div>
+        </div>
+        <div class="stat-group">
+          <div class="stat-label-row"><span>Recoil Control</span><span id="stat-recoil-val">82</span></div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="stat-recoil-bar" style="width: 82%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Right Outfits Strip -->
+      <div class="armory-right-outfits">
+        <div class="outfits-scroll" id="armory-outfits-list">
+          <div class="outfit-card active" data-outfit="specops">
+            <div class="outfit-thumb specops-thumb">🪖</div>
+            <span>Tactical Spec-Ops</span>
+          </div>
+          <div class="outfit-card" data-outfit="ghillie">
+            <div class="outfit-thumb ghillie-thumb">🌿</div>
+            <span>Ghillie Suit</span>
+          </div>
+          <div class="outfit-card" data-outfit="luffy">
+            <div class="outfit-thumb luffy-thumb">👒</div>
+            <span>Anime Straw Hat Luffy Outfit</span>
+          </div>
+          <div class="outfit-card" data-outfit="mercenary">
+            <div class="outfit-thumb merc-thumb">🕶️</div>
+            <span>Urban Mercenary</span>
+          </div>
+          <div class="outfit-card" data-outfit="desert">
+            <div class="outfit-thumb desert-thumb">🏜️</div>
+            <span>Desert Commando</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 3. GAME SETTINGS MODAL ==================== -->
+    <section id="modal-settings" class="ui-modal hidden">
+      <div class="settings-window">
+        <div class="settings-top-bar">
+          <h2>GAME SETTINGS — إعدادات اللعبة (@qs_66)</h2>
+          <button class="close-modal-btn" id="btn-close-settings">✕</button>
+        </div>
+
+        <div class="settings-body">
+          <!-- Main Controls & Sliders Area -->
+          <div class="settings-content">
+            <div class="settings-section-title">HUD & BUTTON CUSTOMIZATION — إعدادات أزرار التحكم</div>
+            <button class="customize-layout-trigger" id="btn-open-layout-editor">
+              تعديل وتخصيص أماكن الأزرار (CUSTOMIZE BUTTON LAYOUT)
+            </button>
+
+            <div class="sliders-2col">
+              <div class="slider-box">
+                <div class="slider-header">
+                  <span>Button Size (حجم الأزرار)</span>
+                  <strong id="lbl-btn-size">100%</strong>
+                </div>
+                <input type="range" id="rng-btn-size" min="60" max="150" value="100" />
+              </div>
+              <div class="slider-box">
+                <div class="slider-header">
+                  <span>Button Opacity (شفافية الأزرار)</span>
+                  <strong id="lbl-btn-opacity">75%</strong>
+                </div>
+                <input type="range" id="rng-btn-opacity" min="20" max="100" value="75" />
+              </div>
+            </div>
+
+            <div class="settings-section-title">SENSITIVITY — الحساسية والسرعة</div>
+            <div class="sliders-2col">
+              <div class="slider-box">
+                <div class="slider-header">
+                  <span>Free Camera (حساسية الكاميرا الحرة)</span>
+                  <strong id="lbl-sens-cam">80%</strong>
+                </div>
+                <input type="range" id="rng-sens-cam" min="10" max="200" value="80" />
+              </div>
+              <div class="slider-box">
+                <div class="slider-header">
+                  <span>ADS Sensitivity (حساسية التصويب)</span>
+                  <strong id="lbl-sens-ads">65%</strong>
+                </div>
+                <input type="range" id="rng-sens-ads" min="10" max="200" value="65" />
+              </div>
+              <div class="slider-box">
+                <div class="slider-header">
+                  <span>Joystick Speed (سرعة الترسول)</span>
+                  <strong id="lbl-sens-joy">90%</strong>
+                </div>
+                <input type="range" id="rng-sens-joy" min="30" max="150" value="90" />
+              </div>
+              <div class="slider-box">
+                <div class="slider-header">
+                  <span>Scope Sensitivity (حساسية المنظار)</span>
+                  <strong id="lbl-sens-scope">45%</strong>
+                </div>
+                <input type="range" id="rng-sens-scope" min="10" max="200" value="45" />
+              </div>
+            </div>
+
+            <div class="settings-section-title">GRAPHICS & FRAME RATE — الرسوميات والفريمات</div>
+            <div class="option-pills-row" id="graphics-quality-row">
+              <button class="opt-pill" data-gfx="smooth">Smooth (سلسة)</button>
+              <button class="opt-pill active" data-gfx="balanced">Balanced (متوازنة)</button>
+              <button class="opt-pill" data-gfx="hd">HD (عالية)</button>
+              <button class="opt-pill" data-gfx="ultra">Ultra HD (فائقة)</button>
+            </div>
+
+            <div class="option-pills-row" id="fps-select-row">
+              <button class="opt-pill" data-fps="30">Low (30 FPS)</button>
+              <button class="opt-pill" data-fps="45">Medium (45 FPS)</button>
+              <button class="opt-pill active" data-fps="60">High (60 FPS)</button>
+              <button class="opt-pill" data-fps="90">Extreme (90 FPS)</button>
+              <button class="opt-pill" data-fps="120">Ultra (120 FPS)</button>
+            </div>
+
+            <label class="checkbox-row">
+              <input type="checkbox" id="chk-soft-shadows" checked />
+              <span>تفعيل الظلال الحقيقية الناعمة (Realistic Soft Shadows)</span>
+            </label>
+          </div>
+
+          <!-- Right Side Category Tabs -->
+          <div class="settings-tabs-sidebar">
+            <div class="set-tab active">عناصر التحكم</div>
+            <div class="set-tab">الحساسية</div>
+            <div class="set-tab">الرسوميات والظلال</div>
+            <div class="set-tab">الصوت</div>
+          </div>
+        </div>
+
+        <div class="settings-footer">
+          <button class="footer-btn cancel" id="btn-cancel-settings">إلغاء (CANCEL)</button>
+          <button class="footer-btn reset" id="btn-reset-settings">إعادة ضبط الافتراضي (RESET)</button>
+          <button class="footer-btn save" id="btn-save-settings">حفظ وتطبيق (SAVE & APPLY)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 4. IN-GAME HUD SCREEN ==================== -->
+    <section id="screen-hud" class="ui-screen hidden">
+      <!-- Top Left Telemetry & Squad List -->
+      <div class="hud-top-left">
+        <div class="telemetry-bar" id="hud-telemetry">FPS: 60 | PING: 20ms | @qs_66</div>
+        <div class="squad-box">
+          <div class="squad-member"><span class="sq-num">1</span> <span id="sq-my-name">@qs_66</span></div>
+          <div class="squad-member"><span class="sq-num">2</span> <span>Ghost_Unit</span></div>
+          <div class="squad-member"><span class="sq-num">3</span> <span>Tactical_03</span></div>
+          <div class="squad-member"><span class="sq-num">4</span> <span>Sniper_IQ</span></div>
+        </div>
+      </div>
+
+      <!-- Top Center TDM Scoreboard -->
+      <div class="hud-scoreboard">
+        <div class="score-side blue-side">
+          <span class="team-lbl">BLUE</span>
+          <strong id="hud-score-blue">0</strong>
+        </div>
+        <div class="score-center">
+          <span class="target-lbl">TARGET 40</span>
+          <small id="hud-timer">08:00</small>
+        </div>
+        <div class="score-side red-side">
+          <strong id="hud-score-red">0</strong>
+          <span class="team-lbl">RED</span>
+        </div>
+      </div>
+
+      <!-- Top Right Radar Minimap & Quick Icons -->
+      <div class="hud-top-right">
+        <div class="hud-mini-icons">
+          <button class="hud-icon-btn" id="btn-hud-settings">⚙</button>
+          <button class="hud-icon-btn" id="btn-hud-camera" title="Switch TPS/FPS">🎥</button>
+          <button class="hud-icon-btn" id="btn-hud-leave" title="Exit to Lobby">🚪</button>
+        </div>
+        <div class="radar-circle">
+          <canvas id="radar-canvas" width="110" height="110"></canvas>
+        </div>
+      </div>
+
+      <!-- Kill Feed -->
+      <div id="hud-killfeed"></div>
+
+      <!-- Center Crosshair -->
+      <div id="hud-crosshair">
+        <span class="ch-arm top"></span>
+        <span class="ch-arm bottom"></span>
+        <span class="ch-arm left"></span>
+        <span class="ch-arm right"></span>
+      </div>
+
+      <!-- Bottom Center Weapon & Health Bar -->
+      <div class="hud-bottom-bar">
+        <div class="weapon-hud-card" id="btn-hud-swap-weapon">
+          <span class="wpn-hud-title" id="hud-wpn-name">M416</span>
+          <span class="wpn-hud-ammo" id="hud-wpn-ammo">30 / 180</span>
+        </div>
+        <div class="health-bar-wrap">
+          <span id="hud-hp-num">100</span>
+          <div class="health-bar-track"><div id="hud-hp-fill"></div></div>
+        </div>
+      </div>
+
+      <!-- Touch Zones & Circular Dark Action Buttons -->
+      <div id="hud-touch-left"></div>
+      <div id="hud-touch-right"></div>
+
+      <!-- Virtual Joystick -->
+      <div class="hud-draggable" id="hud-joystick" data-id="joystick" style="left: 9%; bottom: 16%;">
+        <div class="joy-outer">
+          <div class="joy-inner" id="joy-knob"></div>
+        </div>
+        <span class="hud-btn-caption">JOYSTICK</span>
+      </div>
+
+      <!-- Left Fire Button -->
+      <div class="hud-draggable hud-circle-btn" id="btn-act-fire-left" data-id="fireLeft" style="left: 4%; top: 42%; width: 68px; height: 68px;">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="#fff"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+        <span class="hud-btn-caption">FIRE</span>
+      </div>
+
+      <!-- Grenade Button -->
+      <div class="hud-draggable hud-circle-btn" id="btn-act-grenade" data-id="grenade" style="left: 25%; bottom: 10%; width: 52px; height: 52px;">
+        <span>💣</span>
+        <span class="hud-btn-caption">GRENADE</span>
+      </div>
+
+      <!-- Main Right Fire Button (Bullet Icon) -->
+      <div class="hud-draggable hud-circle-btn fire-main" id="btn-act-fire-right" data-id="fireRight" style="right: 13%; bottom: 20%; width: 82px; height: 82px;">
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="#fff"><path d="M17.5 3.5L20.5 6.5L7.5 19.5L3.5 20.5L4.5 16.5L17.5 3.5Z"/></svg>
+        <span class="hud-btn-caption">FIRE</span>
+      </div>
+
+      <!-- Scope / ADS Button -->
+      <div class="hud-draggable hud-circle-btn" id="btn-act-scope" data-id="scope" style="right: 5%; bottom: 48%; width: 60px; height: 60px;">
+        <svg viewBox="0 0 24 24" width="26" height="26" stroke="#fff" stroke-width="2" fill="none"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+        <span class="hud-btn-caption">SCOPE</span>
+      </div>
+
+      <!-- Reload Button -->
+      <div class="hud-draggable hud-circle-btn" id="btn-act-reload" data-id="reload" style="right: 25%; bottom: 22%; width: 56px; height: 56px;">
+        <span>🔄</span>
+        <span class="hud-btn-caption">RELOAD</span>
+      </div>
+
+      <!-- Jump Button -->
+      <div class="hud-draggable hud-circle-btn" id="btn-act-jump" data-id="jump" style="right: 4%; bottom: 28%; width: 56px; height: 56px;">
+        <span>🏃</span>
+        <span class="hud-btn-caption">JUMP</span>
+      </div>
+
+      <!-- Crouch Button -->
+      <div class="hud-draggable hud-circle-btn" id="btn-act-crouch" data-id="crouch" style="right: 15%; bottom: 6%; width: 54px; height: 54px;">
+        <span>🧎</span>
+        <span class="hud-btn-caption">CROUCH</span>
+      </div>
+
+      <!-- Prone Button -->
+      <div class="hud-draggable hud-circle-btn" id="btn-act-prone" data-id="prone" style="right: 5%; bottom: 6%; width: 54px; height: 54px;">
+        <span>🛌</span>
+        <span class="hud-btn-caption">PRONE</span>
+      </div>
+
+      <!-- Layout Editor Save Banner (Visible only when dragging HUD buttons) -->
+      <div id="layout-editor-banner" class="hidden">
+        <span>DRAG ANY BUTTON TO REPOSITION — اسحب أي زر لتغيير مكانه</span>
+        <button id="btn-save-layout-done">SAVE LAYOUT (حفظ)</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Load Lobby, Armory, Settings & 3D Character Preview Controller -->
+  <script src="lobby.js"></script>
+  <!-- Optional Combat Engine (Will be loaded when combat.js is added in Part 2) -->
+  <script src="combat.js" onerror="console.log('Part 2 combat.js ready to be added next')"></script>
+</body>
+</html>
