@@ -1,4 +1,4 @@
-name: Build Android APK (حرب)
+name: Build Android APK (@qs_66)
 
 on:
   push:
@@ -24,29 +24,38 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # تثبيت إصدار Gradle 8.7 المتوافق لحل مشكلة XmlParser نهائياً
+      - name: Setup Gradle 8.7
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.7'
+
+      # تجهيز مشروع اللعبة باسم "حرب" ونقل الملفات
       - name: Setup Cordova & Project Files
         run: |
           npm install -g cordova
-          cordova create build_app com.qs66.battlegrounds "Battlegrounds Pro"
+          cordova create build_app com.qs66.harb "حرب"
           
-          # مسح الملفات الافتراضية ونسخ ملفات اللعبة
+          # تنظيف ونسخ ملفات اللعبة الأربعة
           rm -rf build_app/www/*
           cp index.html build_app/www/
           [ -f "style.css" ] && cp style.css build_app/www/ || true
           [ -f "lobby.js" ] && cp lobby.js build_app/www/ || true
           [ -f "combat.js" ] && cp combat.js build_app/www/ || true
 
-          # ضبط الوضع العرضي وملء الشاشة بأمان داخل config.xml التلقائي
+          # ضبط الوضع العرضي وملء الشاشة
           sed -i 's|</widget>|    <preference name="Orientation" value="landscape" />\n    <preference name="Fullscreen" value="true" />\n</widget>|' build_app/config.xml
 
+      # بناء الـ APK باستخدام Gradle 8.7 المتوافق
       - name: Build Android APK
         working-directory: ./build_app
         run: |
           cordova platform add android@12.0.1
           cordova build android --debug
 
+      # رفع ملف الـ APK باسم "حرب" للتنزيل
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Battlegrounds-Pro-APK
+          name: Harb-Game-APK
           path: build_app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
