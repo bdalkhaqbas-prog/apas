@@ -1,4 +1,4 @@
-name: Build Android APK (@qs_66)
+name: Build Android APK (حرب)
 
 on:
   push:
@@ -10,44 +10,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. جلب ملفات اللعبة الأربعة من المستودع
+      # 1. سحب ملفات اللعبة من المستودع
       - name: Checkout Game Files
         uses: actions/checkout@v4
 
-      # 2. تثبيت Node.js
+      # 2. تجهيز Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 3. تثبيت Java JDK 17 الرسمية لبناء الأندرويد
+      # 3. تجهيز Java JDK 17
       - name: Setup Java JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # 4. تثبيت Android SDK
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      # 5. إنشاء مشروع الأندرويد ونسخ الملفات الأربعة داخله
-      - name: Create Cordova Project & Copy Files
+      # 4. قبول رخص Android SDK وتثبيت build-tools الرسمية
+      - name: Accept Android Licenses & SDK
         run: |
-          which gradle || (sudo apt-get update && sudo apt-get install -y gradle)
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+
+      # 5. تجهيز مشروع Cordova ونقل ملفات اللعبة
+      - name: Setup Project Files
+        run: |
           npm install -g cordova
           cordova create build_app com.qs66.battlegrounds "Battlegrounds Pro"
-          
-          # مسح الملفات الافتراضية
           rm -rf build_app/www/*
-          
-          # نسخ ملفات لعبتك الأربعة إلى مجلد التطبيق
           cp index.html build_app/www/
           if [ -f "style.css" ]; then cp style.css build_app/www/; fi
           if [ -f "lobby.js" ]; then cp lobby.js build_app/www/; fi
           if [ -f "combat.js" ]; then cp combat.js build_app/www/; fi
 
-          # إعداد ملف config.xml لقفل الشاشة بالعرض وملء الشاشة الكامل
           cat << 'EOF' > build_app/config.xml
           <?xml version='1.0' encoding='utf-8'?>
           <widget id="com.qs66.battlegrounds" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
@@ -66,14 +62,14 @@ jobs:
           </widget>
           EOF
 
-      # 6. بناء وتجميع ملف الـ APK النهائي
+      # 6. بناء ملف الـ APK
       - name: Build Android APK
         working-directory: ./build_app
         run: |
-          cordova platform add android
+          cordova platform add android@12.0.1
           cordova build android --debug
 
-      # 7. رفع ملف الـ APK الجاهز لكي تحمله في هاتفك
+      # 7. رفع ملف الـ APK للتنزيل
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
