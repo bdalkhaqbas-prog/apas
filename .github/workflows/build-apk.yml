@@ -24,13 +24,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # تثبيت إصدار Gradle 8.7 المتوافق لحل مشكلة XmlParser نهائياً
       - name: Setup Gradle 8.7
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.7'
 
-      # تجهيز مشروع اللعبة باسم "حرب" ونقل الملفات
+      - name: Install Android Build Tools 33.0.2
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33"
+
       - name: Setup Cordova & Project Files
         run: |
           npm install -g cordova
@@ -46,14 +48,12 @@ jobs:
           # ضبط الوضع العرضي وملء الشاشة
           sed -i 's|</widget>|    <preference name="Orientation" value="landscape" />\n    <preference name="Fullscreen" value="true" />\n</widget>|' build_app/config.xml
 
-      # بناء الـ APK باستخدام Gradle 8.7 المتوافق
       - name: Build Android APK
         working-directory: ./build_app
         run: |
           cordova platform add android@12.0.1
           cordova build android --debug
 
-      # رفع ملف الـ APK باسم "حرب" للتنزيل
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
